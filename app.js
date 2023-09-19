@@ -5,7 +5,7 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const postsRoutes = require('../route/post');
+const Routes = require('../route/post');
 
 app.use("/posts",postsRoutes);
 
