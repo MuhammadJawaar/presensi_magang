@@ -1,9 +1,9 @@
 const models = require('../models');
 
-function cek(req, res){
+function login(req, res){
     
 }
 
 module.exports = {
-    cek:cek
+    login:login
 }
