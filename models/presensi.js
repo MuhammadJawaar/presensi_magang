@@ -15,7 +15,8 @@ module.exports = (sequelize, DataTypes) => {
   }
   Presensi.init({
     waktu: DataTypes.DATE,
-    image_url: DataTypes.STRING
+    image_url: DataTypes.STRING,
+    p_id: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Presensi',

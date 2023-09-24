@@ -15,6 +15,9 @@ module.exports = {
       t_id: {
         type: Sequelize.INTEGER
       },
+      tugas_url: {
+        type: Sequelize.STRING
+      },
       status_pengerjaan: {
         type: Sequelize.BOOLEAN
       },
