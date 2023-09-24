@@ -5,8 +5,8 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const Routes = require('../route/post');
+const accountRoute = require('./routes/account');
 
-app.use("/posts",postsRoutes);
+app.use("/account",accountRoute);
 
 module.exports = app;

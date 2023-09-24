@@ -1,8 +1,8 @@
 const express = require('express');
-const peserta_magangController = require('../controllers/account.controller')
+const accountController = require('../controllers/account.controller')
 
-const router = express.router;
+const router = express.Router();
 
-router.post("/login", peserta_magangController.save);
+router.post("/login", accountController.cek);
 
 module.exports = router;
