@@ -10,10 +10,18 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       p_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Peserta_Magangs', // Nama tabel lain yang akan dijadikan referensi
+          key: 'id',          // Nama kolom yang akan dijadikan referensi
+        }
       },
       t_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Tugas', // Nama tabel lain yang akan dijadikan referensi
+          key: 'id',          // Nama kolom yang akan dijadikan referensi
+        }
       },
       tugas_url: {
         type: Sequelize.STRING

@@ -16,7 +16,13 @@ module.exports = {
         type: Sequelize.STRING
       },
       p_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Peserta_Magangs', // Nama tabel lain yang akan dijadikan referensi
+          key: 'id',          // Nama kolom yang akan dijadikan referensi
+        },
+        onDelete: 'CASCADE',   // Opsi ketika data di tabel referensi dihapus
+        onUpdate: 'CASCADE',   // Opsi ketika data di tabel referensi diperbarui
       },
       createdAt: {
         allowNull: false,
