@@ -7,8 +7,10 @@ app.use(bodyParser.json());
 
 const accountRoute = require('./routes/account');
 const adminRoute = require('./routes/admin');
+const userRoute = require('./routes/user');
 
 app.use("/account",accountRoute);
 app.use("/admin",adminRoute);
+app.use("/user",userRoute);
 
 module.exports = app;

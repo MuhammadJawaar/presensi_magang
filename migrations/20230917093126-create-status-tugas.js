@@ -29,9 +29,6 @@ module.exports = {
       status_pengerjaan: {
         type: Sequelize.BOOLEAN
       },
-      status_verifikasi: {
-        type: Sequelize.BOOLEAN
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

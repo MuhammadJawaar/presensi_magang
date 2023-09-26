@@ -10,12 +10,18 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      // Presensi.belongsTo(models.Pesertas, {
+      //   foreignKey: 'p_id', // Name of the foreign key in Presensi table
+      //   as: 'peserta_Magang', // Alias for the association
+      // });
     }
   }
   Presensi.init({
-    waktu: DataTypes.DATE,
-    image_url: DataTypes.STRING,
+    tanggal: DataTypes.DATEONLY,
+    check_in: DataTypes.DATE,
+    check_out: DataTypes.DATE,
+    image_url_in: DataTypes.STRING,
+    image_url_out: DataTypes.STRING,
     p_id: DataTypes.INTEGER
   }, {
     sequelize,

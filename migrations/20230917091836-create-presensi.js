@@ -9,10 +9,19 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      waktu: {
+      tanggal: {
+        type: Sequelize.DATEONLY
+      },
+      check_in: {
         type: Sequelize.DATE
       },
-      image_url: {
+      check_out: {
+        type: Sequelize.DATE
+      },
+      image_url_in: {
+        type: Sequelize.STRING
+      },
+      image_url_out: {
         type: Sequelize.STRING
       },
       p_id: {
