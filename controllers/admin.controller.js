@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const models = require('../models');
 const moment = require('moment');
+const Validator = require('fastest-validator');
 
 function addAdmin(req, res){
     const admin = {
@@ -8,6 +9,23 @@ function addAdmin(req, res){
         username: req.body.username,
         password: req.body.password
     }
+
+    const schema = {
+        nama: {type:"string", optional:false, max:50},
+        username: {type:"string", optional:false, max:50},
+        password: {type:"string", optional:false, max:50}
+    }
+
+    const v = new Validator();
+    const validationResponse = v.validate(admin, schema);
+
+    if(validationResponse !== true){
+        return res.status(400).json({
+            message: "Validation false",
+            errors: validationResponse
+        });
+    }
+
     models.Admin.create(admin).then(result => {
         res.status(201).json({
             message: "admin created successfully"
