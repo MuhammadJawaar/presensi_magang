@@ -5,8 +5,12 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const postsRoutes = require('../route/post');
+const accountRoute = require('./routes/account');
+const adminRoute = require('./routes/admin');
+const userRoute = require('./routes/user');
 
-app.use("/posts",postsRoutes);
+app.use("/account",accountRoute);
+app.use("/admin",adminRoute);
+app.use("/user",userRoute);
 
 module.exports = app;

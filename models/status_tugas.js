@@ -16,8 +16,8 @@ module.exports = (sequelize, DataTypes) => {
   Status_tugas.init({
     p_id: DataTypes.INTEGER,
     t_id: DataTypes.INTEGER,
-    status_pengerjaan: DataTypes.BOOLEAN,
-    status_verifikasi: DataTypes.BOOLEAN
+    tugas_url: DataTypes.STRING,
+    status_pengerjaan: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'Status_tugas',

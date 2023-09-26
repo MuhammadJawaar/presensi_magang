@@ -9,11 +9,29 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      waktu: {
+      tanggal: {
+        type: Sequelize.DATEONLY
+      },
+      check_in: {
         type: Sequelize.DATE
       },
-      image_url: {
+      check_out: {
+        type: Sequelize.DATE
+      },
+      image_url_in: {
         type: Sequelize.STRING
+      },
+      image_url_out: {
+        type: Sequelize.STRING
+      },
+      p_id: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Peserta_Magangs', // Nama tabel lain yang akan dijadikan referensi
+          key: 'id',          // Nama kolom yang akan dijadikan referensi
+        },
+        onDelete: 'CASCADE',   // Opsi ketika data di tabel referensi dihapus
+        onUpdate: 'CASCADE',   // Opsi ketika data di tabel referensi diperbarui
       },
       createdAt: {
         allowNull: false,
