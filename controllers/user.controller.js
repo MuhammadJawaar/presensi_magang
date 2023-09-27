@@ -185,10 +185,53 @@ function doTugas(req, res){
     });
 }
 
+function editPassword(){
+    bcryptjs.genSalt(10,async function(err,salt){
+        bcryptjs.hash(req.body.password,salt,async function(err,hash){
+            try {
+                const id = req.params.id;
+                const updatedPeserta = {
+                    password: hash                
+                }
+                const schema = {
+                    password: {type:"string", optional:false, max:50},
+                }
+
+                const v = new Validator();
+                const validationResponse = v.validate(udpatePeserta, schema);
+
+                if(validationResponse !== true){
+                    return res.status(400).json({
+                        message: "Validation false",
+                        errors: validationResponse
+                    });
+                }
+
+                models.Peserta_Magang.update(updatedPeserta, {where:{id:id}}).then(result =>{
+                    res.status(200).json({
+                        message: "Peserta Magang updated successfully"
+                    });
+                }).catch(error =>{
+                    res.status(500).json({
+                        message: "Something went wrong",
+                        error:error
+                    });
+                });
+            } catch (error){
+                res.status(500).json({
+                    message: "Something went wrong",
+                    error:error
+                });
+            }
+        });
+    });
+}
+
 module.exports = {
     showTugasList:showTugasList,
     showTugas:showTugas,
     showPresensi:showPresensi,
     doPresensi:doPresensi,
-    doTugas:doTugas
+    doTugas:doTugas,
+    editPassword:editPassword
 }

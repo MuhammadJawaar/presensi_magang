@@ -8,5 +8,6 @@ router.get("/tugas/:id", userController.showTugas);
 router.patch("/tugas/:tid/submit", userController.doTugas);
 router.get('/presensi/:id', userController.showPresensi);
 router.patch('/presensi/:id/up', userController.doPresensi);
+router.patch('/peserta/:id/edit', userController.editPassword);
 
 module.exports = router;

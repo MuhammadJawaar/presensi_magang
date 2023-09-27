@@ -2,8 +2,11 @@ const { Op } = require('sequelize');
 const models = require('../models');
 const moment = require('moment');
 const Validator = require('fastest-validator');
+const bcryptjs = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 function addAdmin(req, res){
+    
     const admin = {
         nama: req.body.nama,
         username: req.body.username,
@@ -39,29 +42,72 @@ function addAdmin(req, res){
 }
 
 async function addPeserta(req, res){
-    
-    try {
-        const peserta_magang = {
-            nama: req.body.nama,
-            username: req.body.username,
-            password: req.body.password,
-            asal_univ: req.body.asal_univ,
-            asal_jurusan: req.body.asal_jurusan,
-            tanggal_mulai: req.body.tanggal_mulai,
-            tanggal_selesai: req.body.tanggal_selesai,
-            status_aktif: req.body.status_aktif
+    models.Admin.findOne({where:{username: req.body.username}}).then (result =>{
+        if (result){
+            res.status(409).json({
+                message: 'dah ada email bang'
+            })
+        }else{
+            models.Peserta_Magang.findOne({where:{username: req.body.username}}).then(result =>{
+                bcryptjs.genSalt(10,async function(err,salt){
+                    bcryptjs.hash(req.body.password,salt,async function(err,hash){
+                        try {
+                            const peserta_magang = {
+                                nama: req.body.nama,
+                                username: req.body.username,
+                                password: hash,
+                                asal_univ: req.body.asal_univ,
+                                asal_jurusan: req.body.asal_jurusan,
+                                tanggal_mulai: req.body.tanggal_mulai,
+                                tanggal_selesai: req.body.tanggal_selesai,
+                                status_aktif: req.body.status_aktif
+                            }
+                            const schema = {
+                                nama: {type:"string", optional:false, max:50},
+                                username: {type:"string", optional:false, max:50},
+                                password: {type:"string", optional:false, max:50},
+                                asal_univ: {type:"string", optional:false, max:50},
+                                asal_jurusan: {type:"string", optional:false, max:50},
+                                tanggal_mulai: {type:"date-only", optional:false},
+                                tanggal_selesai: {type:"date-only", optional:false},
+                                status_aktif: {type:"boolean", optional:false},
+                            }
+                            console.log("cek");
+                            const v = new Validator();
+                            const validationResponse = v.validate(peserta_magang, schema);
+                            console.log("cek2");
+                            if(validationResponse !== true){
+                                return res.status(400).json({
+                                    message: "Validation false",
+                                    errors: validationResponse
+                                });
+                            }
+                            console.log("cek3");
+                            const result_peserta = await models.Peserta_Magang.create(peserta_magang);
+                            const pid = peserta_magang.id; 
+                            await addPresensiForPeserta(result_peserta, req, res);
+                            
+                        }catch(error){
+                            res.status(500).json({
+                                message: "Something went wrong",
+                                error:error
+                            });
+                        }    
+                    });
+                });
+            }).catch(error=>{
+                res.status(500).json({
+                    message: "Something went wrong",
+                    error:error
+                });
+            });                           
         }
-        const result_peserta = await models.Peserta_Magang.create(peserta_magang);
-        const pid = peserta_magang.id; //kalo error mungkin salah di sini
-        await addPresensiForPeserta(result_peserta, req, res);
-        
-    }catch(error){
+    }).catch(error=>{
         res.status(500).json({
             message: "Something went wrong",
             error:error
         });
-    }
-    
+    });
 }
 
 async function addPresensiForPeserta(result_peserta, req, res){
@@ -127,26 +173,57 @@ function showPesertaAll(req, res){
 }
 
 function editPeserta(req,res){
-    const id = req.params.id;
-    const updatedPeserta = {
-        nama: req.body.nama,
-        username: req.body.username,
-        password: req.body.password,
-        asal_univ: req.body.asal_univ,
-        asal_jurusan: req.body.asal_jurusan,
-        tanggal_mulai: req.body.tanggal_mulai,
-        tanggal_selesai: req.body.tanggal_selesai,
-        status_aktif: req.body.status_aktif
-    }
+    bcryptjs.genSalt(10,async function(err,salt){
+        bcryptjs.hash(req.body.password,salt,async function(err,hash){
+            try {
+                const id = req.params.id;
+                const updatedPeserta = {
+                    nama: req.body.nama,
+                    username: req.body.username,
+                    password: hash,
+                    asal_univ: req.body.asal_univ,
+                    asal_jurusan: req.body.asal_jurusan,
+                    tanggal_mulai: req.body.tanggal_mulai,
+                    tanggal_selesai: req.body.tanggal_selesai,
+                    status_aktif: req.body.status_aktif
+                }
+                const schema = {
+                    nama: {type:"string", optional:false, max:50},
+                    username: {type:"string", optional:false, max:50},
+                    password: {type:"string", optional:false, max:50},
+                    asal_univ: {type:"string", optional:false, max:50},
+                    asal_jurusan: {type:"string", optional:false, max:50},
+                    tanggal_mulai: {type:"datetime", optional:false},
+                    tanggal_selesai: {type:"datetime", optional:false},
+                    status_aktif: {type:"boolean", optional:false},
+                }
 
-    models.Peserta_Magang.update(updatedPeserta, {where:{id:id}}).then(result =>{
-        res.status(200).json({
-            message: "Peserta Magang updated successfully"
-        });
-    }).catch(error =>{
-        res.status(500).json({
-            message: "Something went wrong",
-            error:error
+                const v = new Validator();
+                const validationResponse = v.validate(udpatePeserta, schema);
+                
+                if(validationResponse !== true){
+                    return res.status(400).json({
+                        message: "Validation false",
+                        errors: validationResponse
+                    });
+                }
+
+                models.Peserta_Magang.update(updatedPeserta, {where:{id:id}}).then(result =>{
+                    res.status(200).json({
+                        message: "Peserta Magang updated successfully"
+                    });
+                }).catch(error =>{
+                    res.status(500).json({
+                        message: "Something went wrong",
+                        error:error
+                    });
+                });
+            } catch (error){
+                res.status(500).json({
+                    message: "Something went wrong",
+                    error:error
+                });
+            }
         });
     });
 }
@@ -165,19 +242,6 @@ function deletePeserta(req, res){
         });
     });
 }
-
-// function showPresensiAll(req, res){ //sebenernya ga penting
-//     models.Presensi.findAll({where:{status_aktif: true}}).then(result =>{
-//         res.status(200).json({
-//             presensi:result
-//         });
-//     }).catch(error =>{
-//         res.status(500).json({
-//             message: "Something went wrong",
-//             error:error
-//         });
-//     });
-// }
 
 function showPresensiPerDay(req, res){
     const currentDate = new Date();
@@ -275,22 +339,37 @@ function showTugasStatusByTugas(req, res){
 
 async function addTugas(req, res) {
     try {
-      const tugas = {
-        judul: req.body.judul,
-        tugas_url: req.body.tugas_url,
-        dueDate: req.body.dueDate
-      }
+        const tugas = {
+            judul: req.body.judul,
+            tugas_url: req.body.tugas_url,
+            dueDate: req.body.dueDate
+        }
+        const schema = {
+            judul: {type:"string", optional:false, max:50},
+            tugas_url: {type:"string", optional:false, max:50},
+            dueDate: {type:"date", optional:false}
+        }
+
+        const v = new Validator();
+        const validationResponse = v.validate(tugas, schema);
+
+        if(validationResponse !== true){
+            return res.status(400).json({
+                message: "Validation false",
+                errors: validationResponse
+            });
+        }
   
       // Create the tugas record and await the result
-      const result_tugas = await models.Tugas.create(tugas);
+        const result_tugas = await models.Tugas.create(tugas);
   
       // Call the addStatusToAll function with result_tugas
-      await addStatusToAll(result_tugas, req, res);
+        await addStatusToAll(result_tugas, req, res);
     } catch (error) {
-      res.status(500).json({
-        message: "Something went wrong1",
-        error: error
-      });
+        res.status(500).json({
+            message: "Something went wrong1",
+            error: error
+        });
     }
 }
 
