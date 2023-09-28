@@ -192,17 +192,23 @@ function editPeserta(req,res){
                     tanggal_selesai: req.body.tanggal_selesai,
                     status_aktif: req.body.status_aktif
                 }
+                const isDateOnly = (value) => {
+                    // Add your custom validation logic here to check if the value is a date without a time component
+                    // For example, you can use a regular expression to match date-only format (YYYY-MM-DD)
+                    const dateOnlyRegex = /^\d{4}-\d{2}-\d{2}$/;
+                    return dateOnlyRegex.test(value);
+                };
+                
                 const schema = {
-                    nama: {type:"string", optional:false, max:50},
-                    username: {type:"string", optional:false, max:50},
-                    password: {type:"string", optional:false, max:50},
-                    asal_univ: {type:"string", optional:false, max:50},
-                    asal_jurusan: {type:"string", optional:false, max:50},
-                    tanggal_mulai: {type:"datetime", optional:false},
-                    tanggal_selesai: {type:"datetime", optional:false},
-                    status_aktif: {type:"boolean", optional:false},
-                }
-
+                    nama: { type: "string", optional: false, max: 50 },
+                    username: { type: "string", optional: false, max: 50 },
+                    password: { type: "string", optional: false},
+                    asal_univ: { type: "string", optional: false, max: 50 },
+                    asal_jurusan: { type: "string", optional: false, max: 50 },
+                    tanggal_mulai: { type: "custom", messages: { custom: "Invalid date format" }, check: isDateOnly },
+                    tanggal_selesai: { type: "custom", messages: { custom: "Invalid date format" }, check: isDateOnly },
+                    status_aktif: { type: "boolean" } // Validate as a boolean
+                };
                 const v = new Validator();
                 const validationResponse = v.validate(udpatePeserta, schema);
                 
