@@ -20,8 +20,8 @@ module.exports = (sequelize, DataTypes) => {
     nama: DataTypes.STRING,
     asal_univ: DataTypes.STRING,
     asal_jurusan: DataTypes.STRING,
-    tanggal_mulai: DataTypes.DATE,
-    tanggal_selesai: DataTypes.DATE,
+    tanggal_mulai: DataTypes.DATEONLY,
+    tanggal_selesai: DataTypes.DATEONLY,
     status_aktif: DataTypes.BOOLEAN,
     username: DataTypes.STRING,
     password: DataTypes.STRING
