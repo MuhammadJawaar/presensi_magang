@@ -79,10 +79,8 @@ async function addPeserta(req, res){
                                 tanggal_selesai: { type: "custom", messages: { custom: "Invalid date format" }, check: isDateOnly },
                                 status_aktif: { type: "boolean" } // Validate as a boolean
                             };
-                            console.log("cek");
                             const v = new Validator();
                             const validationResponse = v.validate(peserta_magang, schema);
-                            console.log("cek2");
                             if(validationResponse !== true){
                                 return res.status(400).json({
                                     message: "Validation false",
