@@ -87,7 +87,6 @@ async function addPeserta(req, res){
                                     errors: validationResponse
                                 });
                             }else{
-                                console.log("cek3");
                                 const result_peserta = await models.Peserta_Magang.create(peserta_magang);
                                 const pid = peserta_magang.id; 
                                 await addPresensiForPeserta(result_peserta, req, res);
