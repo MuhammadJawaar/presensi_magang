@@ -19,10 +19,10 @@ module.exports = {
         type: Sequelize.STRING
       },
       tanggal_mulai: {
-        type: Sequelize.DATE
+        type: Sequelize.DATEONLY
       },
       tanggal_selesai: {
-        type: Sequelize.DATE
+        type: Sequelize.DATEONLY
       },
       status_aktif: {
         type: Sequelize.BOOLEAN
