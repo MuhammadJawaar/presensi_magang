@@ -266,9 +266,9 @@ function showPeserta(req, res){
     });
 }
 
-function showPesertaAll(req, res){
+async function showPesertaAll(req, res){
     statusCheck(req, res);
-    models.Peserta_Magang.findAll().then(result =>{
+    await models.Peserta_Magang.findAll().then(result =>{
         res.status(200).json({
             peserta_magang:result
         });
@@ -445,6 +445,7 @@ function showPresensiPerPeserta(req, res){
 
 function showTugas(req, res){
     const id = req.params.id;
+    statusCheck(req, res);
 
     models.Tugas.findByPk(id).then(result =>{
         res.status(200).json({
@@ -459,6 +460,7 @@ function showTugas(req, res){
 }
 
 function showTugasAll(req, res){
+    statusCheck(req, res);
     models.Tugas.findAll().then(result =>{
         res.status(200).json({
             tugas:result
@@ -489,6 +491,7 @@ function showTugasStatusByTugas(req, res){
 
 async function addTugas(req, res) {
     try {
+        statusCheck(req, res);
         const tugas = {
             judul: req.body.judul,
             tugas_url: req.body.tugas_url,
@@ -566,36 +569,28 @@ function deleteTugas(req, res){
     });
 }
 
-function statusCheck(req, res){
-    const currentDate = new Date(); // Get the current date
-
-    models.Peserta_Magang.findAll().then(result => {
-        const pesertaMagangWithUpdatedStatus = result.map(peserta => {
-            // Extract the tanggal_selesai attribute from each Peserta_Magang object
-            const tanggalSelesai = new Date(peserta.tanggal_selesai);
-
-            // Check if the tanggal_selesai is in the past
-            const isExpired = tanggalSelesai < currentDate;
-
-            // Update the status_aktif attribute based on the expiration status
-            const newStatus ={
-                status_aktif: !isExpired
-            }
-            
-
-            // Return the updated Peserta_Magang object
-            return peserta.update(newStatus);
+async function statusCheck(req, res){
+    try {
+        const currentDate = moment(); // Get the current date and time
+        // Find all Peserta_Magang entities where tanggal_selesai is earlier than the current date
+        const outdatedPeserta = await models.Peserta_Magang.findAll({
+          where: {
+            tanggal_selesai: {
+              [Op.lt]: currentDate,
+            },
+          },
         });
-
-        res.status(200).json({
-            peserta_magang: pesertaMagangWithUpdatedStatus
-        });
-    }).catch(error => {
-        res.status(500).json({
-            message: "Something went wrong",
-            error: error
-        });
-    });
+    
+        // Update the status_aktif to false for outdatedPeserta
+        await Promise.all(
+          outdatedPeserta.map(async (peserta) => {
+            await peserta.update({ status_aktif: false });
+          })
+        );
+        console.log('Status of outdated Peserta_Magang entities updated successfully');
+      } catch (error) {
+        console.error('Error updating status of outdated Peserta_Magang entities:', error);
+      }
 }
 
 module.exports = {
