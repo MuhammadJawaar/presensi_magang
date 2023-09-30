@@ -16,7 +16,8 @@ function login(req, res){
                     if (result){
                         const token = jwt.sign({
                             username: peserta.username,
-                            pesertaid: peserta.id
+                            pesertaid: peserta.id,
+                            role: role
                         },'secret', function(err,token){
                             res.status(200).json({
                                 message: "berhasil autentikasi",
@@ -36,7 +37,7 @@ function login(req, res){
                 message: 'email atau password salah',
             });
         })          
-        }else{
+        }else if(role == 'admin'){
         models.Admin.findOne({where:{username:req.body.username}}).then(peserta => {
             if (peserta == null){
                 res.status(401).json({
@@ -47,7 +48,8 @@ function login(req, res){
                     if (result){
                         const token = jwt.sign({
                             username: peserta.username,
-                            pesertaid: peserta.id
+                            pesertaid: peserta.id,
+                            role:role
                         },'secret', function(err,token){
                             res.status(200).json({
                                 message: "berhasil autentikasi",

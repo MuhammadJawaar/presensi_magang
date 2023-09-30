@@ -5,40 +5,137 @@ const Validator = require('fastest-validator');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+
 function addAdmin(req, res){
-    
-    const admin = {
-        nama: req.body.nama,
-        username: req.body.username,
-        password: req.body.password
-    }
-
-    const schema = {
-        nama: {type:"string", optional:false, max:50},
-        username: {type:"string", optional:false, max:50},
-        password: {type:"string", optional:false, max:50}
-    }
-
-    const v = new Validator();
-    const validationResponse = v.validate(admin, schema);
-
-    if(validationResponse !== true){
-        return res.status(400).json({
-            message: "Validation false",
-            errors: validationResponse
-        });
-    }
-
-    models.Admin.create(admin).then(result => {
-        res.status(201).json({
-            message: "admin created successfully"
-        });
+    models.Admin.findOne({where:{username: req.body.username}}).then(result =>{
+        if (result){
+            res.status(409).json({
+                message: 'dah ada email bang'
+            })        
+        }else{
+            models.Peserta_Magang.findOne({where:{username: req.body.username}}).then(result =>{
+                if (result){
+                    res.status(409).json({
+                        message: 'dah ada email bang'
+                    })
+                }else{
+                    bcryptjs.genSalt(10,async function(err,salt){
+                        bcryptjs.hash(req.body.password,salt,async function(err,hash){
+                            const admin = {
+                                nama: req.body.nama,
+                                username: req.body.username,
+                                password: hash
+                            }
+                        
+                            const schema = {
+                                nama: {type:"string", optional:false, max:50},
+                                username: {type:"string", optional:false, max:50},
+                                password: {type:"string", optional:false}
+                            }
+                        
+                            const v = new Validator();
+                            const validationResponse = v.validate(admin, schema);
+                        
+                            if(validationResponse !== true){
+                                return res.status(400).json({
+                                    message: "Validation false",
+                                    errors: validationResponse
+                                });
+                            }
+                        
+                            models.Admin.create(admin).then(result => {
+                                res.status(201).json({
+                                    message: "admin created successfully"
+                                });
+                            }).catch(error =>{
+                                res.status(500).json({
+                                    message: "Something went wrong",
+                                    error:error
+                                });
+                            });        
+                    
+                        })
+                    })
+                }
+            }).catch(error =>{
+                res.status(500).json({
+                    message: "Something went wrong",
+                    error:error
+                });
+            })
+        }
     }).catch(error =>{
         res.status(500).json({
             message: "Something went wrong",
             error:error
         });
-    });
+    })   
+}
+
+function editAdmin(req, res){
+    models.Admin.findOne({where:{username: req.body.username}}).then(result =>{
+        if (result){
+            res.status(409).json({
+                message: 'dah ada email bang'
+            })        
+        }else{
+            models.Peserta_Magang.findOne({where:{username: req.body.username}}).then(result =>{
+                if (result){
+                    res.status(409).json({
+                        message: 'dah ada email bang'
+                    })
+                }else{
+                    bcryptjs.genSalt(10,async function(err,salt){
+                        bcryptjs.hash(req.body.password,salt,async function(err,hash){
+                            const admin = {
+                                nama: req.body.nama,
+                                username: req.body.username,
+                                password: hash
+                            }
+                        
+                            const schema = {
+                                nama: {type:"string", optional:false, max:50},
+                                username: {type:"string", optional:false, max:50},
+                                password: {type:"string", optional:false}
+                            }
+                        
+                            const v = new Validator();
+                            const validationResponse = v.validate(admin, schema);
+                        
+                            if(validationResponse !== true){
+                                return res.status(400).json({
+                                    message: "Validation false",
+                                    errors: validationResponse
+                                });
+                            }
+                        
+                            models.Admin.update(admin, {where:{id:req.params.id}}).then(result => {
+                                res.status(201).json({
+                                    message: "admin updated successfully"
+                                });
+                            }).catch(error =>{
+                                res.status(500).json({
+                                    message: "Something went wrong1",
+                                    error:error
+                                });
+                            });        
+                    
+                        })
+                    })
+                }
+            }).catch(error =>{
+                res.status(500).json({
+                    message: "Something went wrong2",
+                    error:error
+                });
+            })
+        }
+    }).catch(error =>{
+        res.status(500).json({
+            message: "Something went wrong",
+            error:error
+        });
+    })
 }
 
 async function addPeserta(req, res){
@@ -49,6 +146,11 @@ async function addPeserta(req, res){
             })
         }else{
             models.Peserta_Magang.findOne({where:{username: req.body.username}}).then(result =>{
+                if(result){
+                    res.status(409).json({
+                        message: 'dah ada email bang'
+                    })                    
+                }else{
                 bcryptjs.genSalt(10,async function(err,salt){
                     bcryptjs.hash(req.body.password,salt,async function(err,hash){
                         try {
@@ -88,18 +190,18 @@ async function addPeserta(req, res){
                                 });
                             }else{
                                 const result_peserta = await models.Peserta_Magang.create(peserta_magang);
-                                const pid = peserta_magang.id; 
                                 await addPresensiForPeserta(result_peserta, req, res);
                             }
                             
                         }catch(error){
                             res.status(500).json({
-                                message: "Something went wrong",
+                                message: "Something went wrong1",
                                 error:error
                             });
                         }    
                     });
                 });
+            }
             }).catch(error=>{
                 res.status(500).json({
                     message: "Something went wrong",
@@ -165,6 +267,7 @@ function showPeserta(req, res){
 }
 
 function showPesertaAll(req, res){
+    statusCheck(req, res);
     models.Peserta_Magang.findAll().then(result =>{
         res.status(200).json({
             peserta_magang:result
@@ -176,8 +279,50 @@ function showPesertaAll(req, res){
         });
     });
 }
+async function editPresensi(result_peserta,req,res){
+    try {
+        //result_peserta.tanggal_mulai
+        const tanggalMulai = moment(result_peserta.tanggal_mulai);
+        const tanggalBerakhir = moment(result_peserta.tanggal_selesai);
+        
+        let selisihHari = 0;
+        const presensiData = [];
 
-function editPeserta(req,res){
+        while (tanggalMulai.isBefore(tanggalBerakhir)) {
+            if (tanggalMulai.day() !== 0 && tanggalMulai.day() !== 6) {
+                models.Presensi.findOne({where:{tanggal: tanggalMulai, p_id: result_peserta.id }}).then(result =>{
+                    if(!result){
+                        selisihHari++;
+                        const presensi = {
+                            p_id: result_peserta.id,
+                            tanggal: tanggalMulai.format('YYYY-MM-DD')
+                      };
+                    }
+                }).catch(error => {
+                    res.status(500).json({
+                        message: "Something went wrong2",
+                        error: error
+                      });                   
+                })
+              presensiData.push(presensi);
+            }
+            tanggalMulai.add(1, 'days');
+        }
+        
+        await models.Presensi.bulkCreate(presensiData);
+    
+        res.status(201).json({
+          message: "Presensi created successfully"
+        });
+      } catch (error) {
+        res.status(500).json({
+          message: "Something went wrong2",
+          error: error
+        });
+      }    
+}
+
+async function editPeserta(req,res){
     bcryptjs.genSalt(10,async function(err,salt){
         bcryptjs.hash(req.body.password,salt,async function(err,hash){
             try {
@@ -210,28 +355,22 @@ function editPeserta(req,res){
                     status_aktif: { type: "boolean" } // Validate as a boolean
                 };
                 const v = new Validator();
-                const validationResponse = v.validate(udpatePeserta, schema);
-                
+                const validationResponse = v.validate(updatedPeserta, schema);
+                console.log("cek3");
+
                 if(validationResponse !== true){
                     return res.status(400).json({
                         message: "Validation false",
                         errors: validationResponse
                     });
                 }
-
-                models.Peserta_Magang.update(updatedPeserta, {where:{id:id}}).then(result =>{
-                    res.status(200).json({
-                        message: "Peserta Magang updated successfully"
-                    });
-                }).catch(error =>{
-                    res.status(500).json({
-                        message: "Something went wrong",
-                        error:error
-                    });
-                });
+                console.log("cek2");
+                const result_peserta = await models.Peserta_Magang.update(updatedPeserta, {where:{id:id}});
+                console.log("cek");
+                await editPresensi(result_peserta, req, res);
             } catch (error){
                 res.status(500).json({
-                    message: "Something went wrong",
+                    message: "Something went wrong1",
                     error:error
                 });
             }
@@ -255,10 +394,10 @@ function deletePeserta(req, res){
 }
 
 function showPresensiPerDay(req, res){
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
+    const currentDate = moment(new Date());
+    currentDate.format('YYYY-MM-DD');
     
-    models.Presensi.findAll({where:{createdAt: currentDate}}).then(result =>{
+    models.Presensi.findAll({where:{tanggal: currentDate}}).then(result =>{
         res.status(200).json({
             presensi:result
         });
@@ -358,7 +497,7 @@ async function addTugas(req, res) {
         const schema = {
             judul: {type:"string", optional:false, max:50},
             tugas_url: {type:"string", optional:false, max:50},
-            dueDate: {type:"date", optional:false}
+            
         }
 
         const v = new Validator();
@@ -370,7 +509,7 @@ async function addTugas(req, res) {
                 errors: validationResponse
             });
         }
-  
+        
       // Create the tugas record and await the result
         const result_tugas = await models.Tugas.create(tugas);
   
@@ -427,6 +566,38 @@ function deleteTugas(req, res){
     });
 }
 
+function statusCheck(req, res){
+    const currentDate = new Date(); // Get the current date
+
+    models.Peserta_Magang.findAll().then(result => {
+        const pesertaMagangWithUpdatedStatus = result.map(peserta => {
+            // Extract the tanggal_selesai attribute from each Peserta_Magang object
+            const tanggalSelesai = new Date(peserta.tanggal_selesai);
+
+            // Check if the tanggal_selesai is in the past
+            const isExpired = tanggalSelesai < currentDate;
+
+            // Update the status_aktif attribute based on the expiration status
+            const newStatus ={
+                status_aktif: !isExpired
+            }
+            
+
+            // Return the updated Peserta_Magang object
+            return peserta.update(newStatus);
+        });
+
+        res.status(200).json({
+            peserta_magang: pesertaMagangWithUpdatedStatus
+        });
+    }).catch(error => {
+        res.status(500).json({
+            message: "Something went wrong",
+            error: error
+        });
+    });
+}
+
 module.exports = {
     addAdmin:addAdmin,
     addPeserta:addPeserta,
@@ -442,4 +613,5 @@ module.exports = {
     showTugasStatusByTugas:showTugasStatusByTugas,
     addTugas:addTugas,
     deleteTugas:deleteTugas,
+    editAdmin:editAdmin
 }
