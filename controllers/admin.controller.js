@@ -279,47 +279,50 @@ async function showPesertaAll(req, res){
         });
     });
 }
-async function editPresensi(result_peserta,req,res){
+
+async function editPresensiForPeserta(result_peserta,id, req, res) {
     try {
-        //result_peserta.tanggal_mulai
         const tanggalMulai = moment(result_peserta.tanggal_mulai);
         const tanggalBerakhir = moment(result_peserta.tanggal_selesai);
         
-        let selisihHari = 0;
         const presensiData = [];
 
         while (tanggalMulai.isBefore(tanggalBerakhir)) {
             if (tanggalMulai.day() !== 0 && tanggalMulai.day() !== 6) {
-                models.Presensi.findOne({where:{tanggal: tanggalMulai, p_id: result_peserta.id }}).then(result =>{
-                    if(!result){
-                        selisihHari++;
-                        const presensi = {
-                            p_id: result_peserta.id,
-                            tanggal: tanggalMulai.format('YYYY-MM-DD')
-                      };
+                const existingPresensi = await models.Presensi.findOne({
+                    where: {
+                        p_id: id,
+                        tanggal: tanggalMulai.format('YYYY-MM-DD')
                     }
-                }).catch(error => {
-                    res.status(500).json({
-                        message: "Something went wrong2",
-                        error: error
-                      });                   
-                })
-              presensiData.push(presensi);
+                });
+
+                if (!existingPresensi) {
+                    const presensi = {
+                        p_id: id,
+                        tanggal: tanggalMulai.format('YYYY-MM-DD')
+                    };
+                    presensiData.push(presensi);
+                }
             }
             tanggalMulai.add(1, 'days');
         }
         
-        await models.Presensi.bulkCreate(presensiData);
-    
-        res.status(201).json({
-          message: "Presensi created successfully"
-        });
-      } catch (error) {
+        if (presensiData.length > 0) {
+            await models.Presensi.bulkCreate(presensiData);
+            res.status(201).json({
+                message: "Presensi created successfully"
+            });
+        } else {
+            res.status(200).json({
+                message: "Presensi already exists for the specified dates"
+            });
+        }
+    } catch (error) {
         res.status(500).json({
-          message: "Something went wrong2",
-          error: error
+            message: "Something went wrong",
+            error: error
         });
-      }    
+    }
 }
 
 async function editPeserta(req,res){
@@ -365,12 +368,12 @@ async function editPeserta(req,res){
                     });
                 }
                 console.log("cek2");
-                const result_peserta = await models.Peserta_Magang.update(updatedPeserta, {where:{id:id}});
+                await models.Peserta_Magang.update(updatedPeserta, {where:{id:id}});
                 console.log("cek");
-                await editPresensi(result_peserta, req, res);
+                await editPresensiForPeserta(updatedPeserta,id, req, res)
             } catch (error){
                 res.status(500).json({
-                    message: "Something went wrong1",
+                    message: "Something went wrong12",
                     error:error
                 });
             }
