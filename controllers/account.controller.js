@@ -18,7 +18,7 @@ function login(req, res){
                             username: peserta.username,
                             pesertaid: peserta.id,
                             role: role
-                        },'secret', function(err,token){
+                        },process.env.JWT_KEY, function(err,token){
                             res.status(200).json({
                                 message: "berhasil autentikasi",
                                 token:token
@@ -50,7 +50,7 @@ function login(req, res){
                             username: peserta.username,
                             pesertaid: peserta.id,
                             role:role
-                        },'secret', function(err,token){
+                        },process.env.JWT_KEY, function(err,token){
                             res.status(200).json({
                                 message: "berhasil autentikasi",
                                 token:token
