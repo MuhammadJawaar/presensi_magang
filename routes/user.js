@@ -1,6 +1,7 @@
 const express = require('express');
 const userController = require('../controllers/user.controller');
 const checkAuthMiddleware = require('../middleware/check-auth');
+const imageUploader = require('../helpers/image-uploader');
 
 const router = express.Router();
 

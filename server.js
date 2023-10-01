@@ -4,4 +4,4 @@ const port = 3000;
 
 const server = http.createServer(app);
 
-server.listen(port, () => console.log('nyala ni ges'));
+server.listen(port, () => console.log('http:/localhost:3000'));
