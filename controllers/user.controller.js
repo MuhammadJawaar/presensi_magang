@@ -1,6 +1,7 @@
 const models = require('../models');
 const moment = require('moment');
 
+
 function showTugasList(){
     models.Status_tugas.findAll().then(result =>{
         res.status(200).json({
@@ -15,8 +16,8 @@ function showTugasList(){
 }
 
 function showTugas(req, res){
-    const id = req.params.id;
 
+    const id = req.params.id;
     models.Tugas.findByPk(id).then(result =>{
         res.status(200).json({
             tugas:result
@@ -31,16 +32,22 @@ function showTugas(req, res){
 
 function showPresensi(req, res){
     const id = req.params.id;
-    models.Presensi.findAll({where:{p_id:id}}).then(result =>{
-        res.status(200).json({
-            tugas:result
-        });
+    if (true){
+        models.Presensi.findAll({where:{p_id:id}}).then(result =>{
+            res.status(200).json({
+                tugas:result
+            });
     }).catch(error =>{
         res.status(500).json({
             message: "Something went wrong",
             error:error
         });
     });
+    }else{
+        res.status(403).json({
+            message: "bukan id kamu"
+        })
+    }
 }
 
 function doPresensi(req,res){
@@ -62,7 +69,6 @@ function doPresensi(req,res){
         const currentHour = currentDate.getHours();
         const currentMinute = currentDate.getMinutes();
         const currentSecond = currentDate.getSeconds();
-
 
         if (
             (currentHour >= jamMulai1 && currentHour < jamBerakhir1) ||
@@ -103,7 +109,12 @@ function doPresensi(req,res){
                 });
             });
         }
-    }else{
+        else{
+            res.status(500).json({
+                message: "Something went wrong",
+            });
+        }
+    }else if (hari != 0 || hari != 6){
         const jamMulai1 = 7; // Jam mulai rentang waktu pertama
         const menitMulai1 = 45; // Menit mulai rentang waktu pertama
         const jamBerakhir1 = 8; // Jam berakhir rentang waktu pertama
@@ -161,7 +172,15 @@ function doPresensi(req,res){
                     error:error
                 });
             });
+        }else{
+            res.status(500).json({
+                message: "Something went wrong",
+            });
         }
+    }else{
+        res.status(500).json({
+            message: "Something went wrong",
+        });
     }
 }
 
@@ -194,7 +213,7 @@ function editPassword(){
                     password: hash                
                 }
                 const schema = {
-                    password: {type:"string", optional:false, max:50},
+                    password: {type:"string", optional:false},
                 }
 
                 const v = new Validator();
