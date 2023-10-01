@@ -19,7 +19,7 @@ router.get("/presensi/negatif", checkAuthMiddleware.checkAuthAdmin, adminControl
 router.get("/presensi/:id", checkAuthMiddleware.checkAuthAdmin, adminController.showPresensiPerPeserta)
 
 router.get("/tugas", checkAuthMiddleware.checkAuthAdmin, adminController.showTugasAll);
-router.post("/tugas/add", checkAuthMiddleware.checkAuthAdmin,imageUploader.upload.single('image'), (req, res) =>{
+router.post("/tugas/add", checkAuthMiddleware.checkAuthAdmin, imageUploader.upload.single('image'), (req, res) =>{
     if (!req.file) {
         return res.status(400).json({
           message: 'No file uploaded',

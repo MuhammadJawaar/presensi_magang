@@ -50,9 +50,11 @@ function showPresensi(req, res){
     }
 }
 
-function doPresensi(req,res){
+function doPresensi(req,res, url){
     const currentDate = new Date();
-    const pid = req.params.id
+    const pid = req.params.id;
+    const baseUrl = 'http://localhost:3000/'
+    const fileName = url.replace('\\' , '/');
     const hari = moment(currentDate).day();
     const tanggal = moment(currentDate);
     if (hari == 5){
@@ -77,7 +79,7 @@ function doPresensi(req,res){
         ) {
             const presensi = {
                 check_in: currentDate,
-                image_url_in: req.body.image_url
+                image_url_in: baseUrl + fileName
             }
             models.Presensi.update(presensi, {where:{p_id:pid, tanggal:tanggal.format('YYYY-MM-DD')}}).then(result => {
                 res.status(201).json({
@@ -96,7 +98,7 @@ function doPresensi(req,res){
         ) {
             const presensi = {
                 check_out: currentDate,
-                image_url_out: req.body.image_url
+                image_url_out: baseUrl + fileName
             }
             models.Presensi.update(presensi,{where:{p_id:pid, tanggal:tanggal.format('YYYY-MM-DD')}}).then(result => {
                 res.status(201).json({
@@ -137,7 +139,7 @@ function doPresensi(req,res){
             
             const presensi = {
                 check_in: currentDate,
-                image_url_in: req.body.image_url
+                image_url_in: baseUrl + fileName
             }
             models.Presensi.update(presensi, {where:{p_id:pid, tanggal:tanggal.format('YYYY-MM-DD')}}).then(result => {
                 res.status(201).json({
@@ -158,7 +160,7 @@ function doPresensi(req,res){
             
             const presensi = {
                 check_out: currentDate,
-                image_url_out: req.body.image_url
+                image_url_out: baseUrl + fileName
             }
             models.Presensi.update(presensi,{where:{p_id:pid, tanggal:tanggal.format('YYYY-MM-DD')}}).then(result => {
                 console.log("cek masuk dong");
@@ -185,11 +187,15 @@ function doPresensi(req,res){
 }
 
 
-function doTugas(req, res){
+function doTugas(req, res, url){
     const pid = req.body.pid; //ini perlu diganti biar otomatis
     const tid = req.params.tid;
+
+    const baseUrl = 'http://localhost:3000/'
+    const fileName = url.replace('\\' , '/');
+
     const tugas = {
-        tugas_url: req.body.tugas_url,
+        tugas_url: baseUrl + fileName,
         status_pengerjaan: true
     }
     models.Status_tugas.update(tugas, {where:{p_id:pid, t_id: tid}}).then(result => {
