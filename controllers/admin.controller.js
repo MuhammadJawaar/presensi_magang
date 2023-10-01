@@ -6,7 +6,7 @@ const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 
-function addAdmin(req, res){
+function addAdmin(req, res,){
     models.Admin.findOne({where:{username: req.body.username}}).then(result =>{
         if (result){
             res.status(409).json({
@@ -492,17 +492,19 @@ function showTugasStatusByTugas(req, res){
 
 
 
-async function addTugas(req, res) {
+async function addTugas(req, res, url) {
     try {
         statusCheck(req, res);
+        const baseUrl = 'http://localhost:3000/'
+        const fileName = url.replace('\\' , '/');
         const tugas = {
             judul: req.body.judul,
-            tugas_url: req.body.tugas_url,
+            tugas_url: baseUrl + fileName,
             dueDate: req.body.dueDate
         }
         const schema = {
             judul: {type:"string", optional:false, max:50},
-            tugas_url: {type:"string", optional:false, max:50},
+            tugas_url: {type:"string", optional:false},
             
         }
 
