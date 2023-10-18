@@ -10,6 +10,7 @@ const adminRoute = require('./routes/admin');
 const userRoute = require('./routes/user');
 const imageRoute = require('./routes/image');
 
+
 app.use("/account",accountRoute);
 app.use("/admin",adminRoute);
 app.use("/user",userRoute);
