@@ -4,6 +4,8 @@ const moment = require('moment');
 const Validator = require('fastest-validator');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const exceljs = require('exceljs');
+const fs = require('fs');
 
 
 function addAdmin(req, res,){
@@ -598,6 +600,50 @@ async function statusCheck(req, res){
       }
 }
 
+async function exportAdmin(req, res) {
+    try {
+      const results = await models.Admin.findAll();
+  
+      const workbook = new exceljs.Workbook();
+      const sheet = workbook.addWorksheet('Admins');
+      sheet.columns = [
+        { header: 'ID', key: 'id', width: 25 },
+        { header: 'Nama', key: 'nama', width: 25 },
+        { header: 'Username', key: 'username', width: 25 },
+        { header: 'Password', key: 'password', width: 25 },
+      ];
+  
+      results.forEach((value) => {
+        sheet.addRow({
+          id: value.id,
+          nama: value.nama,
+          username: value.username,
+          password: value.password,
+        });
+      });
+  
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      );
+  
+      res.setHeader(
+        'Content-Disposition',
+        'attachment;filename=Admins.xlsx'
+      );
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      res.end(buffer);
+  
+    } catch (error) {
+      console.error('An error occurred:', error);
+      res.status(500).json({
+        message: 'Something went wrong',
+        error: error,
+      });
+    }
+  }
+
 module.exports = {
     addAdmin:addAdmin,
     addPeserta:addPeserta,
@@ -613,5 +659,6 @@ module.exports = {
     showTugasStatusByTugas:showTugasStatusByTugas,
     addTugas:addTugas,
     deleteTugas:deleteTugas,
-    editAdmin:editAdmin
+    editAdmin:editAdmin,
+    exportAdmin: exportAdmin
 }

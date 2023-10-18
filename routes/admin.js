@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.post("/add-admin", checkAuthMiddleware.checkAuthAdmin, adminController.addAdmin);
 router.patch("/edit-admin/:id", checkAuthMiddleware.checkAuthAdmin, adminController.editAdmin);
+router.get("/export-admin", adminController.exportAdmin);
 
 router.get("/peserta/", checkAuthMiddleware.checkAuthAdmin, adminController.showPesertaAll);
 router.get("/peserta/:id",  checkAuthMiddleware.checkAuthAdmin,adminController.showPeserta); 
