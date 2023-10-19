@@ -12,16 +12,14 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
     */
-   return queryInterface.bulkInsert('Admins', [
-    {  
-    nama: 'Admin1',
-      username: 'Admin1',
-      password: '$2a$10$Mq2p.07xMPLSIgPShT/2CuGpVrR2huXz8cAqKmcO7tiKJK.NIyAg6'
-    }
-   ])
   },
 
   async down (queryInterface, Sequelize) {
-    return queryInterface.bulkDelete('Admins', {}, null);
+    /**
+     * Add commands to revert seed here.
+     *
+     * Example:
+     * await queryInterface.bulkDelete('People', null, {});
+     */
   }
 };

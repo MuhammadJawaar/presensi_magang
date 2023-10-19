@@ -16,7 +16,7 @@ function addAdmin(req, res,){
             models.Peserta_Magang.findOne({where:{username: req.body.username}}).then(result =>{
                 if (result){
                     res.status(409).json({
-                        message: 'dah ada email bang'
+                        message: 'dah ada user bang'
                     })
                 }else{
                     bcryptjs.genSalt(10,async function(err,salt){

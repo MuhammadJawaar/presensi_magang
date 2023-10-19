@@ -1,5 +1,6 @@
 {
     "env":{
-        "JWT_KEY": "secret"
+        "JWT_KEY": "auidhaisuhdiasuohduiadizioasdkvalsdaiosdcn",
+        "REFRESH_TOKEN_SECRET": "asiudniadiuashuidiauhsiudvywybweauidauvijpij"
     }
 }
