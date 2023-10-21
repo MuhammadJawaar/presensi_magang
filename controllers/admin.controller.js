@@ -1,9 +1,12 @@
 const { Op } = require('sequelize');
+const Sequelize = require('sequelize');
 const models = require('../models');
 const moment = require('moment');
 const Validator = require('fastest-validator');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const exceljs = require('exceljs');
+const fs = require('fs');
 
 
 function addAdmin(req, res,){
@@ -16,7 +19,7 @@ function addAdmin(req, res,){
             models.Peserta_Magang.findOne({where:{username: req.body.username}}).then(result =>{
                 if (result){
                     res.status(409).json({
-                        message: 'dah ada user bang'
+                        message: 'dah ada email bang'
                     })
                 }else{
                     bcryptjs.genSalt(10,async function(err,salt){
@@ -179,7 +182,7 @@ async function addPeserta(req, res){
                                 asal_jurusan: { type: "string", optional: false, max: 50 },
                                 tanggal_mulai: { type: "custom", messages: { custom: "Invalid date format" }, check: isDateOnly },
                                 tanggal_selesai: { type: "custom", messages: { custom: "Invalid date format" }, check: isDateOnly },
-                                status_aktif: { type: "boolean" } // Validate as a boolean
+                                status_aktif: { type: "boolean" } // Validate as a boolean
                             };
                             const v = new Validator();
                             const validationResponse = v.validate(peserta_magang, schema);
@@ -355,7 +358,7 @@ async function editPeserta(req,res){
                     asal_jurusan: { type: "string", optional: false, max: 50 },
                     tanggal_mulai: { type: "custom", messages: { custom: "Invalid date format" }, check: isDateOnly },
                     tanggal_selesai: { type: "custom", messages: { custom: "Invalid date format" }, check: isDateOnly },
-                    status_aktif: { type: "boolean" } // Validate as a boolean
+                    status_aktif: { type: "boolean" } // Validate as a boolean
                 };
                 const v = new Validator();
                 const validationResponse = v.validate(updatedPeserta, schema);
@@ -396,13 +399,20 @@ function deletePeserta(req, res){
     });
 }
 
-function showPresensiPerDay(req, res){
-    const currentDate = moment(new Date());
-    currentDate.format('YYYY-MM-DD');
-    
-    models.Presensi.findAll({where:{tanggal: currentDate}}).then(result =>{
+async function showPresensiPerDay(req, res){
+    const currentDate = new Date();
+    const tanggal = moment(currentDate);
+    await models.Peserta_Magang.findAll({
+        include:[{
+            model: models.Presensi,
+            as:'presensimagang',
+            where: {
+                tanggal:tanggal.format('YYYY-MM-DD')
+            }
+        }]
+    }).then(presensi =>{
         res.status(200).json({
-            presensi:result
+            presensi: presensi
         });
     }).catch(error =>{
         res.status(500).json({
@@ -478,7 +488,17 @@ function showTugasAll(req, res){
 
 function showTugasStatusByTugas(req, res){
     const tid = req.params.id;
-    models.Status_tugas.findAll({where:{t_id:tid}}).then(result =>{
+    models.Peserta_Magang.findAll({
+        where: {
+            status_aktif:true
+        },
+        include:[{
+            model:models.Status_tugas,
+            where:{
+                t_id:tid
+            }
+        }]
+    }).then(result =>{
         res.status(200).json({
             tugas:result
         });
@@ -598,6 +618,227 @@ async function statusCheck(req, res){
       }
 }
 
+async function exportAdmin(req, res) {
+    try {
+      const results = await models.Admin.findAll();
+  
+      const workbook = new exceljs.Workbook();
+      const sheet = workbook.addWorksheet('Admins');
+      sheet.columns = [
+        { header: 'ID', key: 'id', width: 3 },
+        { header: 'Nama', key: 'nama', width: 30 },
+        { header: 'Username', key: 'username', width: 20 },
+        { header: 'Password', key: 'password', width: 80 },
+      ];
+  
+      results.forEach((value) => {
+        sheet.addRow({
+          id: value.id,
+          nama: value.nama,
+          username: value.username,
+          password: value.password,
+        });
+      });
+  
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      );
+  
+      res.setHeader(
+        'Content-Disposition',
+        'attachment;filename=Admins.xlsx'
+      );
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      res.end(buffer);
+  
+    } catch (error) {
+      console.error('An error occurred:', error);
+      res.status(500).json({
+        message: 'Something went wrong',
+        error: error,
+      });
+    }
+}
+
+async function exportPeserta(req, res) {
+    try {
+      const results = await models.Peserta_Magang.findAll();
+  
+      const workbook = new exceljs.Workbook();
+      const sheet = workbook.addWorksheet('Peserta Magangs');
+      sheet.columns = [
+        { header: 'ID', key: 'id', width: 3 },
+        { header: 'Nama', key: 'nama', width: 30 },
+        { header: 'Username', key: 'username', width: 30 },
+        { header: 'Password', key: 'password', width: 80 },
+        { header: 'Asal Universitas', key: 'asal_univ', width: 80 },
+        { header: 'Asal Jurusan', key: 'asal_jurusan', width: 80 },
+        { header: 'Tanggal Mulai', key: 'tanggal_mulai', width: 80 },
+        { header: 'Tanggal Selesai', key: 'tanggal_selesai', width: 80 },
+        { header: 'Status Aktif', key: 'status_aktif', width: 80 }
+      ];
+  
+      results.forEach((value) => {
+        sheet.addRow({
+          id: value.id,
+          nama: value.nama,
+          username: value.username,
+          password: value.password,
+          asal_univ: value.asal_univ,
+          asal_jurusan: value.asal_jurusan,
+          tanggal_mulai: value.tanggal_mulai,
+          tanggal_selesai: value.tanggal_selesai,
+          status_aktif: value.status_aktif
+        });
+      });
+  
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      );
+  
+      res.setHeader(
+        'Content-Disposition',
+        'attachment;filename=PesertaMagangs.xlsx'
+      );
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      res.end(buffer);
+  
+    } catch (error) {
+      console.error('An error occurred:', error);
+      res.status(500).json({
+        message: 'Something went wrong',
+        error: error,
+      });
+    }
+  }
+
+  async function exportStatusTugas(req, res) {
+    try {
+      const tid = req.params.id;
+      const results = await models.Peserta_Magang.findAll({
+        include:[{
+            model:models.Status_tugas,
+            where:{
+                t_id:tid
+            }
+        }]
+      });
+  
+      const workbook = new exceljs.Workbook();
+      const sheet = workbook.addWorksheet('Status Tugas');
+      sheet.columns = [
+        { header: 'Nama', key: 'nama', width: 30 },
+        { header: 'Asal Universitas', key: 'asal_univ', width: 80 },
+        { header: 'Status Pengerjaan', key: 'status_pengerjaan', width: 30 }
+      ];
+  
+      results.forEach((value) => {
+        console.log('Data:', value);
+        const statusPengerjaan = value.Status_tugas[0].status_pengerjaan ? 'Sudah Mengerjakan' : 'Belum Mengerjakan';
+        
+        sheet.addRow({
+          nama: value.nama,
+          asal_univ: value.asal_univ,
+          status_pengerjaan: statusPengerjaan
+        });
+      });
+  
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      );
+  
+      res.setHeader(
+        'Content-Disposition',
+        'attachment;filename=StatusTugas.xlsx'
+      );
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      res.end(buffer);
+  
+    } catch (error) {
+      console.error('An error occurred:', error);
+      res.status(500).json({
+        message: 'Something went wrong',
+        error: error,
+      });
+    }
+  }
+
+  async function exportPresensiPeserta(req, res) {
+    try {
+      const currentDate = new Date();
+      const tanggal = moment(currentDate);
+      const results = await models.Peserta_Magang.findAll({
+        include:[{
+            model: models.Presensi,
+            as:'presensimagang',
+            where: {
+                tanggal:tanggal.format('YYYY-MM-DD')
+            }
+        }]
+      });
+  
+      const workbook = new exceljs.Workbook();
+      const sheet = workbook.addWorksheet('Presensi');
+      sheet.columns = [
+        { header: 'ID', key: 'id', width: 3 },
+        { header: 'Nama', key: 'nama', width: 30 },
+        { header: 'Asal Universitas', key: 'asal_univ', width: 80 },
+        { header: 'Asal Jurusan', key: 'asal_jurusan', width: 80 },
+        { header: 'Tanggal Mulai', key: 'tanggal_mulai', width: 80 },
+        { header: 'Tanggal Selesai', key: 'tanggal_selesai', width: 80 },
+        { header: 'Status Aktif', key: 'status_aktif', width: 80 },
+        { header: 'Tanggal', key: 'tanggal', width: 80 },
+        { header: 'Check-In', key: 'check_in', width: 80 },
+        { header: 'Check-Out', key: 'check_out', width: 80 }
+
+      ];
+  
+      results.forEach((value) => {
+        const tanggalPresensi = value.presensimagang[0].tanggal;
+        const checkInPresensi = value.presensimagang[0].check_in;
+        const checkOutPresensi = value.presensimagang[0].check_out;
+        sheet.addRow({
+          id: value.id,
+          nama: value.nama,
+          asal_univ: value.asal_univ,
+          asal_jurusan: value.asal_jurusan,
+          tanggal_mulai: value.tanggal_mulai,
+          tanggal_selesai: value.tanggal_selesai,
+          status_aktif: value.status_aktif,
+          tanggal: tanggalPresensi,
+          check_in: checkInPresensi,
+          check_out: checkOutPresensi
+        });
+      });
+  
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      );
+  
+      res.setHeader(
+        'Content-Disposition',
+        'attachment;filename=Presensi.xlsx'
+      );
+  
+      const buffer = await workbook.xlsx.writeBuffer();
+      res.end(buffer);
+  
+    } catch (error) {
+      console.error('An error occurred:', error);
+      res.status(500).json({
+        message: 'Something went wrong',
+        error: error,
+      });
+    }
+  }
+
 module.exports = {
     addAdmin:addAdmin,
     addPeserta:addPeserta,
@@ -613,5 +854,9 @@ module.exports = {
     showTugasStatusByTugas:showTugasStatusByTugas,
     addTugas:addTugas,
     deleteTugas:deleteTugas,
-    editAdmin:editAdmin
+    editAdmin:editAdmin,
+    exportAdmin: exportAdmin,
+    exportPeserta: exportPeserta,
+    exportStatusTugas: exportStatusTugas,
+    exportPresensiPeserta: exportPresensiPeserta
 }
