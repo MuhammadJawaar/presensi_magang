@@ -5,9 +5,9 @@ const imageUploader = require('../helpers/image-uploader');
 
 const router = express.Router();
 
-router.get("/tugas/list", checkAuthMiddleware.checkAuthPeserta, userController.showTugasList);
-router.get("/tugas/:id", checkAuthMiddleware.checkAuthPeserta, userController.showTugas); //cek token
-router.patch("/tugas/:tid/submit", checkAuthMiddleware.checkAuthPeserta, imageUploader.upload.single('image'), (req, res) =>{
+router.get("/tugas/list", checkAuthMiddleware.checkAuth('peserta_magang'), userController.showTugasList);
+router.get("/tugas/:id", checkAuthMiddleware.checkAuth('peserta_magang'), userController.showTugas); //cek token
+router.patch("/tugas/:tid/submit", checkAuthMiddleware.checkAuth('peserta_magang'), imageUploader.upload.single('image'), (req, res) =>{
     if (!req.file) {
         return res.status(400).json({
           message: 'No file uploaded',
@@ -17,8 +17,8 @@ router.patch("/tugas/:tid/submit", checkAuthMiddleware.checkAuthPeserta, imageUp
       const uploadedFileUrl = req.file.path;
       userController.doTugas(req,res,uploadedFileUrl);
 }); //cek token
-router.get('/presensi/:id', checkAuthMiddleware.checkAuthPeserta, userController.showPresensi); //cek token
-router.patch('/presensi/:id/up', checkAuthMiddleware.checkAuthPeserta, imageUploader.upload.single('image'), (req, res) =>{
+router.get('/presensi/:id', checkAuthMiddleware.checkAuth('peserta_magang'), userController.showPresensi); //cek token
+router.patch('/presensi/:id/up', checkAuthMiddleware.checkAuth('peserta_magang'), imageUploader.upload.single('image'), (req, res) =>{
     if (!req.file) {
         return res.status(400).json({
           message: 'No file uploaded',
@@ -28,6 +28,6 @@ router.patch('/presensi/:id/up', checkAuthMiddleware.checkAuthPeserta, imageUplo
       const uploadedFileUrl = req.file.path;
       userController.doPresensi(req,res,uploadedFileUrl); //cek token
 });
-router.patch('/peserta/:id/edit', checkAuthMiddleware.checkAuthPeserta, userController.editPassword); //cek token
+router.patch('/peserta/:id/edit', checkAuthMiddleware.checkAuth('peserta_magang'), userController.editPassword); //cek token
 
 module.exports = router;

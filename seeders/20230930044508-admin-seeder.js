@@ -12,7 +12,7 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
     */
-   return queryInterface.bulkInsert('Admin', [
+   return queryInterface.bulkInsert('Admins', [
     {  
     nama: 'Admin1',
       username: 'Admin1',
@@ -22,6 +22,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    return queryInterface.bulkDelete('Admin', {}, null);
+    return queryInterface.bulkDelete('Admins', {}, null);
   }
 };

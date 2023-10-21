@@ -182,7 +182,7 @@ async function addPeserta(req, res){
                                 asal_jurusan: { type: "string", optional: false, max: 50 },
                                 tanggal_mulai: { type: "custom", messages: { custom: "Invalid date format" }, check: isDateOnly },
                                 tanggal_selesai: { type: "custom", messages: { custom: "Invalid date format" }, check: isDateOnly },
-                                status_aktif: { type: "boolean" } // Validate as a boolean
+                                status_aktif: { type: "boolean" } // Validate as a boolean
                             };
                             const v = new Validator();
                             const validationResponse = v.validate(peserta_magang, schema);
@@ -358,7 +358,7 @@ async function editPeserta(req,res){
                     asal_jurusan: { type: "string", optional: false, max: 50 },
                     tanggal_mulai: { type: "custom", messages: { custom: "Invalid date format" }, check: isDateOnly },
                     tanggal_selesai: { type: "custom", messages: { custom: "Invalid date format" }, check: isDateOnly },
-                    status_aktif: { type: "boolean" } // Validate as a boolean
+                    status_aktif: { type: "boolean" } // Validate as a boolean
                 };
                 const v = new Validator();
                 const validationResponse = v.validate(updatedPeserta, schema);
@@ -859,4 +859,8 @@ module.exports = {
     exportPeserta: exportPeserta,
     exportStatusTugas: exportStatusTugas,
     exportPresensiPeserta: exportPresensiPeserta
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 95bdce0e2476f31a1a1d26b5d1f458cd5295e48d

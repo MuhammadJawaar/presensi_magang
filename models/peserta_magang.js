@@ -27,7 +27,8 @@ module.exports = (sequelize, DataTypes) => {
     tanggal_selesai: DataTypes.DATEONLY,
     status_aktif: DataTypes.BOOLEAN,
     username: DataTypes.STRING,
-    password: DataTypes.STRING
+    password: DataTypes.STRING,
+    refreshTokens: DataTypes.STRING    
   }, {
     sequelize,
     modelName: 'Peserta_Magang',
