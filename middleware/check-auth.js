@@ -8,7 +8,6 @@ function checkAuth(role) {
             const decodedToken = jwt.verify(token, process.env.JWT_KEY);
             req.userData = decodedToken;
             const userRole = decodedToken.role;
-            await refreshToken(req, res);
 
             if (userRole === role) {
                 if (role === 'admin') {
