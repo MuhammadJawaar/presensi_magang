@@ -11,6 +11,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Tugas.hasMany(models.Status_tugas, {
+        foreignKey: 't_id', // Name of the foreign key in Presensi table
+      });
     }
   }
   Tugas.init({
