@@ -859,8 +859,4 @@ module.exports = {
     exportPeserta: exportPeserta,
     exportStatusTugas: exportStatusTugas,
     exportPresensiPeserta: exportPresensiPeserta
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 95bdce0e2476f31a1a1d26b5d1f458cd5295e48d
