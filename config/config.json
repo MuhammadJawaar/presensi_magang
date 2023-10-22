@@ -1,11 +1,11 @@
 {
   "development": {
-    "username": "root",
-    "password": null,
-    "database": "presensi_magang_database",
-    "host": "127.0.0.1",
+    "username": "uyfedsxbr1cppbka",
+    "password": "La7kLDjEA3j0gY7C9d8f",
+    "database": "bdxp3y0ncyr2qyyy9t2z",
+    "host": "bdxp3y0ncyr2qyyy9t2z-mysql.services.clever-cloud.com",
     "dialect": "mysql",
-    "timezone": "+07:00" 
+    "port": "3306"
   },
   
   "test": {

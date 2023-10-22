@@ -5,13 +5,13 @@ const imageUploader = require('../helpers/image-uploader')
 
 const router = express.Router();
 
-router.post("/add-admin", checkAuthMiddleware.checkAuth('admin'), adminController.addAdmin);
+router.post("/add-admin", adminController.addAdmin);
 router.patch("/edit-admin/:id", checkAuthMiddleware.checkAuth('admin'), adminController.editAdmin);
 router.get("/export-admin", checkAuthMiddleware.checkAuth('admin'), adminController.exportAdmin);
 
-router.get("/peserta/", checkAuthMiddleware.checkAuth('admin'), adminController.showPesertaAll);
+router.get("/peserta", checkAuthMiddleware.checkAuth('admin'), adminController.showPesertaAll);
 router.get("/peserta/:id",  checkAuthMiddleware.checkAuth('admin'),adminController.showPeserta); 
-router.post("/peserta/add", checkAuthMiddleware.checkAuth('admin'), adminController.addPeserta);
+router.post("/peserta/add", adminController.addPeserta);
 router.patch("/peserta/:id/edit", checkAuthMiddleware.checkAuth('admin'), adminController.editPeserta);
 router.delete("/peserta/:id/delete", checkAuthMiddleware.checkAuth('admin'), adminController.deletePeserta);
 router.get("/peserta/export-peserta", checkAuthMiddleware.checkAuth('admin'), adminController.exportPeserta);
