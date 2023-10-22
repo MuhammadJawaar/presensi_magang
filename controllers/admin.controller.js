@@ -1,13 +1,13 @@
 const { Op } = require('sequelize');
 const Sequelize = require('sequelize');
 const models = require('../models');
-const moment = require('moment');
+const moment = require('moment-timezone');
 const Validator = require('fastest-validator');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const exceljs = require('exceljs');
 const fs = require('fs');
-
+const axios = require('axios');
 
 function addAdmin(req, res,){
     models.Admin.findOne({where:{username: req.body.username}}).then(result =>{
@@ -400,8 +400,8 @@ function deletePeserta(req, res){
 }
 
 async function showPresensiPerDay(req, res){
-    const currentDate = new Date();
-    const tanggal = moment(currentDate);
+    const response = await axios.get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
+    const tanggal = moment.tz(response.data.datetime, "Asia/Jakarta");
     await models.Peserta_Magang.findAll({
         include:[{
             model: models.Presensi,
@@ -422,24 +422,37 @@ async function showPresensiPerDay(req, res){
     });
 }
 
-async function showPresensiBelum(req, res){
-    const currentDate = new Date();
-    const tanggal = moment(currentDate);
+async function showPresensiBelum(req, res) {
+  try {
+    const response = await axios.get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
+    const tanggal = moment.tz(response.data.datetime, "Asia/Jakarta");
+    
     const presensi = await models.Peserta_Magang.findAll({
-        include:[{
-            model: models.Presensi,
-            as:'presensimagang',
-            where: {
-                tanggal:tanggal.format('YYYY-MM-DD'),[Op.or]: [
-                { check_in: null },
-                { check_out: null },
-            ]}
-        }]
+      include: [{
+        model: models.Presensi,
+        as: 'presensimagang',
+        where: {
+          tanggal: tanggal.format('YYYY-MM-DD'),
+          [Op.or]: [
+            { check_in: null },
+            { check_out: null },
+          ],
+        },
+      }],
     });
-        res.status(200).json({
-            presensi:presensi
-        });
+
+    res.status(200).json({
+      presensi: presensi,
+    });
+  } catch (error) {
+    console.error('An error occurred:', error);
+    res.status(500).json({
+      message: 'Something went wrong',
+      error: error,
+    });
+  }
 }
+
 
 function showPresensiPerPeserta(req, res){
     const pid = req.params.id;
@@ -771,8 +784,8 @@ async function exportPeserta(req, res) {
 
   async function exportPresensiPeserta(req, res) {
     try {
-      const currentDate = new Date();
-      const tanggal = moment(currentDate);
+      const response = await axios.get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
+      const tanggal = moment.tz(response.data.datetime, "Asia/Jakarta");
       const results = await models.Peserta_Magang.findAll({
         include:[{
             model: models.Presensi,

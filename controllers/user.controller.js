@@ -1,5 +1,6 @@
 const models = require('../models');
 const moment = require('moment');
+const axios = require('axios');
 
 
 function showTugasList(){
@@ -50,142 +51,111 @@ function showPresensi(req, res){
     }
 }
 
-function doPresensi(req,res, url){
-    const currentDate = new Date();
-    const pid = req.params.id;
-    const baseUrl = 'http://localhost:3000/'
-    const fileName = url.replace('\\' , '/');
-    const hari = moment(currentDate).day();
-    const tanggal = moment(currentDate);
-    if (hari == 5){
-        const jamMulai1 = 7; // Jam mulai rentang waktu pertama
-        const menitMulai1 = 15; // Menit mulai rentang waktu pertama
-        const jamBerakhir1 = 8; // Jam berakhir rentang waktu pertama
-        const menitBerakhir1 = 45; // Menit berakhir rentang waktu pertama
-
-        const jamMulai2 = 13; // Jam mulai rentang waktu kedua
-        const menitMulai2 = 45; // Menit mulai rentang waktu kedua
-        const jamBerakhir2 = 14; // Jam berakhir rentang waktu kedua
-        const menitBerakhir2 = 15; // Menit berakhir rentang waktu kedua
-
-        const currentHour = currentDate.getHours();
-        const currentMinute = currentDate.getMinutes();
-        const currentSecond = currentDate.getSeconds();
-
+async function doPresensi(req, res, url) {
+    try {
+      const response = await axios.get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
+      const time = moment.tz(response.data.datetime, 'Asia/Jakarta');
+      const pid = req.params.id;
+      const baseUrl = 'http://localhost:3000/';
+      const fileName = url.replace('\\', '/');
+      const hari = time.day();
+      const currentDate = moment(time); // Menggunakan waktu dari WorldTimeAPI
+  
+      const jamMulai1Jumat = 7; // Jam mulai rentang waktu pertama di hari Jumat
+      const menitMulai1Jumat = 15;
+      const jamBerakhir1Jumat = 8; // Jam berakhir rentang waktu pertama di hari Jumat
+      const menitBerakhir1Jumat = 45;
+  
+      const jamMulai2Jumat = 13; // Jam mulai rentang waktu kedua di hari Jumat
+      const menitMulai2Jumat = 45;
+      const jamBerakhir2Jumat = 14; // Jam berakhir rentang waktu kedua di hari Jumat
+      const menitBerakhir2Jumat = 15;
+  
+      const jamMulai1Senmis = 7; // Jam mulai rentang waktu pertama di hari Selasa sampai Kamis
+      const menitMulai1Senmis = 45;
+      const jamBerakhir1Senmis = 8; // Jam berakhir rentang waktu pertama di hari Selasa sampai Kamis
+      const menitBerakhir1Senmis = 15;
+  
+      const jamMulai2Senmis = 15; // Jam mulai rentang waktu kedua di hari Selasa sampai Kamis
+      const menitMulai2Senmis = 45;
+      const jamBerakhir2Senmis = 16; // Jam berakhir rentang waktu kedua di hari Selasa sampai Kamis
+      const menitBerakhir2Senmis = 15;
+  
+      let presensi = {};
+  
+      // Mengambil jam dan menit dari waktu saat ini
+      const currentHour = currentDate.hours();
+      const currentMinute = currentDate.minutes();
+  
+      if (hari === 5) { // Jumat
         if (
-            (currentHour >= jamMulai1 && currentHour < jamBerakhir1) ||
-            (currentHour === jamMulai1 && currentMinute >= menitMulai1) ||
-            (currentHour === jamBerakhir1 && currentMinute <= menitBerakhir1)
+          (currentHour >= jamMulai1Jumat && currentHour < jamBerakhir1Jumat) ||
+          (currentHour === jamMulai1Jumat && currentMinute >= menitMulai1Jumat) ||
+          (currentHour === jamBerakhir1Jumat && currentMinute <= menitBerakhir1Jumat)
         ) {
-            const presensi = {
-                check_in: currentDate,
-                image_url_in: baseUrl + fileName
-            }
-            models.Presensi.update(presensi, {where:{p_id:pid, tanggal:tanggal.format('YYYY-MM-DD')}}).then(result => {
-                res.status(201).json({
-                    message: "Presensi successful"
-                });
-            }).catch(error =>{
-                res.status(500).json({
-                    message: "Something went wrong",
-                    error:error
-                });
-            });
+          presensi = {
+            check_in: currentDate,
+            image_url_in: baseUrl + fileName
+          };
         } else if (
-            (currentHour >= jamMulai2 && currentHour <= jamBerakhir2) ||
-            (currentHour === jamMulai2 && currentMinute >= menitMulai2) ||
-            (currentHour === jamBerakhir2 && currentMinute <= menitBerakhir2)
+          (currentHour >= jamMulai2Jumat && currentHour <= jamBerakhir2Jumat) ||
+          (currentHour === jamMulai2Jumat && currentMinute >= menitMulai2Jumat) ||
+          (currentHour === jamBerakhir2Jumat && currentMinute <= menitBerakhir2Jumat)
         ) {
-            const presensi = {
-                check_out: currentDate,
-                image_url_out: baseUrl + fileName
-            }
-            models.Presensi.update(presensi,{where:{p_id:pid, tanggal:tanggal.format('YYYY-MM-DD')}}).then(result => {
-                res.status(201).json({
-                    message: "Presensi successful"
-                });
-            }).catch(error =>{
-                res.status(500).json({
-                    message: "Something went wrong",
-                    error:error
-                });
-            });
+          presensi = {
+            check_out: currentDate,
+            image_url_out: baseUrl + fileName
+          };
         }
-        else{
-            res.status(500).json({
-                message: "Something went wrong",
-            });
-        }
-    }else if (hari != 0 || hari != 6){
-        const jamMulai1 = 7; // Jam mulai rentang waktu pertama
-        const menitMulai1 = 45; // Menit mulai rentang waktu pertama
-        const jamBerakhir1 = 8; // Jam berakhir rentang waktu pertama
-        const menitBerakhir1 = 15; // Menit berakhir rentang waktu pertama
-
-        const jamMulai2 = 15; // Jam mulai rentang waktu kedua
-        const menitMulai2 = 45; // Menit mulai rentang waktu kedua
-        const jamBerakhir2 = 16; // Jam berakhir rentang waktu kedua
-        const menitBerakhir2 = 15; // Menit berakhir rentang waktu kedua
-
-        const currentHour = currentDate.getHours();
-        const currentMinute = currentDate.getMinutes();
-        const currentSecond = currentDate.getSeconds();
-
+      } else if (hari !== 0 && hari !== 6) { // Selasa sampai Kamis
         if (
-            (currentHour >= jamMulai1 && currentHour < jamBerakhir1) ||
-            (currentHour === jamMulai1 && currentMinute >= menitMulai1) ||
-            (currentHour === jamBerakhir1 && currentMinute <= menitBerakhir1)
+          (currentHour >= jamMulai1Senmis && currentHour < jamBerakhir1Senmis) ||
+          (currentHour === jamMulai1Senmis && currentMinute >= menitMulai1Senmis) ||
+          (currentHour === jamBerakhir1Senmis && currentMinute <= menitBerakhir1Senmis)
         ) {
-            
-            const presensi = {
-                check_in: currentDate,
-                image_url_in: baseUrl + fileName
-            }
-            models.Presensi.update(presensi, {where:{p_id:pid, tanggal:tanggal.format('YYYY-MM-DD')}}).then(result => {
-                res.status(201).json({
-                    message: "Presensi successful",
-                    result:result
-                });
-            }).catch(error =>{
-                res.status(500).json({
-                    message: "Something went wrong",
-                    error:error
-                });
-            });
+          presensi = {
+            check_in: currentDate,
+            image_url_in: baseUrl + fileName
+          };
         } else if (
-            (currentHour >= jamMulai2 && currentHour <= jamBerakhir2) ||
-            (currentHour === jamMulai2 && currentMinute >= menitMulai2) ||
-            (currentHour === jamBerakhir2 && currentMinute <= menitBerakhir2)
+          (currentHour >= jamMulai2Senmis && currentHour <= jamBerakhir2Senmis) ||
+          (currentHour === jamMulai2Senmis && currentMinute >= menitMulai2Senmis) ||
+          (currentHour === jamBerakhir2Senmis && currentMinute <= menitBerakhir2Senmis)
         ) {
-            
-            const presensi = {
-                check_out: currentDate,
-                image_url_out: baseUrl + fileName
-            }
-            models.Presensi.update(presensi,{where:{p_id:pid, tanggal:tanggal.format('YYYY-MM-DD')}}).then(result => {
-                console.log("cek masuk dong");
-                res.status(201).json({
-                    message: "Presensi successful",
-                    result:result
-                });
-            }).catch(error =>{
-                res.status(500).json({
-                    message: "Something went wrong",
-                    error:error
-                });
-            });
-        }else{
-            res.status(500).json({
-                message: "Something went wrong",
-            });
+          presensi = {
+            check_out: currentDate,
+            image_url_out: baseUrl + fileName
+          };
         }
-    }else{
+      }
+  
+      if (Object.keys(presensi).length > 0) {
+        models.Presensi.update(presensi, { where: { p_id: pid, tanggal: time.format('YYYY-MM-DD') } })
+          .then((result) => {
+            res.status(201).json({
+              message: 'Presensi successful',
+              result: result
+            });
+          })
+          .catch((error) => {
+            res.status(500).json({
+              message: 'Something went wrong',
+              error: error
+            });
+          });
+      } else {
         res.status(500).json({
-            message: "Something went wrong",
+          message: 'Something went wrong',
         });
+      }
+    } catch (error) {
+      console.error('An error occurred:', error);
+      res.status(500).json({
+        message: 'Something went wrong',
+        error: error
+      });
     }
-}
-
+  }
 
 function doTugas(req, res, url){
     const pid = req.body.pid; //ini perlu diganti biar otomatis
