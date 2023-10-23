@@ -787,18 +787,10 @@ async function exportPeserta(req, res) {
 
   async function exportPresensiPeserta(req, res) {
     try {
-        res.status(500).json({
-            message: "Something went wrong2",
-            error: error
-          });
       const response = await axios.get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
       const tanggal = req.body.tanggal
         ? moment.tz(req.body.tanggal, "Asia/Jakarta")
         : moment.tz(response.data.datetime, "Asia/Jakarta");
-        res.status(500).json({
-            message: "Something went wrong2",
-            error: error
-          });
       const results = await models.Peserta_Magang.findAll({
         include:[{
             model: models.Presensi,
@@ -807,10 +799,6 @@ async function exportPeserta(req, res) {
                 tanggal:tanggal.format('YYYY-MM-DD')
             }
         }]
-      });
-      res.status(500).json({
-        message: "Something went wrong2",
-        error: error
       });
   
       const workbook = new exceljs.Workbook();
@@ -828,10 +816,6 @@ async function exportPeserta(req, res) {
         { header: 'Check-Out', key: 'check_out', width: 80 }
 
       ];
-      res.status(500).json({
-        message: "Something went wrong2",
-        error: error
-      });
   
       results.forEach((value) => {
         const tanggalPresensi = value.presensimagang[0].tanggal;
