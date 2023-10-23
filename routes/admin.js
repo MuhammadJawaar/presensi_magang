@@ -14,12 +14,12 @@ router.get("/peserta/:id",  checkAuthMiddleware.checkAuth('admin'),adminControll
 router.post("/peserta/add", checkAuthMiddleware.checkAuth('admin'), adminController.addPeserta);
 router.patch("/peserta/:id/edit", checkAuthMiddleware.checkAuth('admin'), adminController.editPeserta);
 router.delete("/peserta/:id/delete", checkAuthMiddleware.checkAuth('admin'), adminController.deletePeserta);
-router.get("/peserta/export-peserta", adminController.exportPeserta);
+router.get("/export-peserta",checkAuthMiddleware.checkAuth('admin'), adminController.exportPeserta);
 
 router.get("/presensi", checkAuthMiddleware.checkAuth('admin'), adminController.showPresensiPerDay);
 router.get("/presensi/negatif", checkAuthMiddleware.checkAuth('admin'), adminController.showPresensiBelum);
-router.get("/presensi/:id", checkAuthMiddleware.checkAuth('admin'), adminController.showPresensiPerPeserta)
-router.get("/presensi/export-presensi",  adminController.exportPresensiPeserta);
+router.get("/presensi/:id", checkAuthMiddleware.checkAuth('admin'), adminController.showPresensiPerPeserta);
+router.get("/export-presensi",checkAuthMiddleware.checkAuth('admin'),  adminController.exportPresensiPeserta);
 
 
 router.get("/tugas", checkAuthMiddleware.checkAuth('admin'), adminController.showTugasAll);
