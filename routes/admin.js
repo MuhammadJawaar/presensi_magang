@@ -16,10 +16,10 @@ router.patch("/peserta/:id/edit", checkAuthMiddleware.checkAuth('admin'), adminC
 router.delete("/peserta/:id/delete", checkAuthMiddleware.checkAuth('admin'), adminController.deletePeserta);
 router.get("/peserta/export-peserta", checkAuthMiddleware.checkAuth('admin'), adminController.exportPeserta);
 
-router.get("/presensi/", checkAuthMiddleware.checkAuth('admin'), adminController.showPresensiPerDay);
+router.get("/presensi/",  adminController.showPresensiPerDay);
 router.get("/presensi/negatif", checkAuthMiddleware.checkAuth('admin'), adminController.showPresensiBelum);
 router.get("/presensi/:id", checkAuthMiddleware.checkAuth('admin'), adminController.showPresensiPerPeserta)
-router.get("/presensi/export-presensi", checkAuthMiddleware.checkAuth('admin'), adminController.exportPresensiPeserta);
+router.get("/presensi/export-presensi",  adminController.exportPresensiPeserta);
 
 
 router.get("/tugas", checkAuthMiddleware.checkAuth('admin'), adminController.showTugasAll);
