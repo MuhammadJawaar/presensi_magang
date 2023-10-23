@@ -9,7 +9,7 @@ router.post("/add-admin", checkAuthMiddleware.checkAuth('admin'), adminControlle
 router.patch("/edit-admin/:id", checkAuthMiddleware.checkAuth('admin'), adminController.editAdmin);
 router.get("/export-admin", checkAuthMiddleware.checkAuth('admin'), adminController.exportAdmin);
 
-router.get("/peserta", checkAuthMiddleware.checkAuth('admin'), adminController.showPesertaAll);
+router.get("/peserta",  adminController.showPesertaAll);
 router.get("/peserta/:id",  checkAuthMiddleware.checkAuth('admin'),adminController.showPeserta); 
 router.post("/peserta/add", checkAuthMiddleware.checkAuth('admin'), adminController.addPeserta);
 router.patch("/peserta/:id/edit", checkAuthMiddleware.checkAuth('admin'), adminController.editPeserta);
