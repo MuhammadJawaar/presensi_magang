@@ -12,8 +12,12 @@ const accountRoute = require('./routes/account');
 const adminRoute = require('./routes/admin');
 const userRoute = require('./routes/user');
 const imageRoute = require('./routes/image');
+const corsOptions = {
+    credentials: true, // Mengizinkan pengiriman kredensial (kuki, header, dll.)
+    origin: process.env.ORIGIN
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use("/account",accountRoute);
 app.use("/admin",adminRoute);
 app.use("/user",userRoute);
