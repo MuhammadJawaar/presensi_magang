@@ -14,7 +14,7 @@ router.get("/peserta/:id",  checkAuthMiddleware.checkAuth('admin'),adminControll
 router.post("/peserta/add", checkAuthMiddleware.checkAuth('admin'), adminController.addPeserta);
 router.patch("/peserta/:id/edit", checkAuthMiddleware.checkAuth('admin'), adminController.editPeserta);
 router.delete("/peserta/:id/delete", checkAuthMiddleware.checkAuth('admin'), adminController.deletePeserta);
-router.get("/peserta/export-peserta", checkAuthMiddleware.checkAuth('admin'), adminController.exportPeserta);
+router.get("/peserta/export-peserta", adminController.exportPeserta);
 
 router.get("/presensi/",  adminController.showPresensiPerDay);
 router.get("/presensi/negatif", checkAuthMiddleware.checkAuth('admin'), adminController.showPresensiBelum);
