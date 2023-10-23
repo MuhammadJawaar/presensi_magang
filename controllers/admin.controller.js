@@ -401,7 +401,9 @@ function deletePeserta(req, res){
 
 async function showPresensiPerDay(req, res){
     const response = await axios.get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
-    const tanggal = moment.tz(response.data.datetime, "Asia/Jakarta");
+    const tanggal = req.body.tanggal
+        ? moment.tz(req.body.tanggal, "Asia/Jakarta")
+        : moment.tz(response.data.datetime, "Asia/Jakarta");
     await models.Peserta_Magang.findAll({
         include:[{
             model: models.Presensi,
@@ -426,6 +428,7 @@ async function showPresensiBelum(req, res) {
   try {
     const response = await axios.get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
     const tanggal = moment.tz(response.data.datetime, "Asia/Jakarta");
+    
     
     const presensi = await models.Peserta_Magang.findAll({
       include: [{

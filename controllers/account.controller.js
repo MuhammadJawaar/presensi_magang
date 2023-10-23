@@ -53,9 +53,7 @@ async function login(req, res) {
                 message: "Berhasil autentikasi",
                 token: token,
                 refreshToken: refreshToken
-            });
-
-            
+            });            
 
         } else {
             res.status(400).json({
