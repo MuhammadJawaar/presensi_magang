@@ -681,6 +681,7 @@ async function exportAdmin(req, res) {
 async function exportPeserta(req, res) {
     try {
       const results = await models.Peserta_Magang.findAll();
+      console.log(results);
   
       const workbook = new exceljs.Workbook();
       const sheet = workbook.addWorksheet('Peserta Magangs');
