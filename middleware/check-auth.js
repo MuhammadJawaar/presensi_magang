@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const { refreshToken } = require('./refresh-token');
 
 function checkAuth(role) {
     return async (req, res, next) => {
