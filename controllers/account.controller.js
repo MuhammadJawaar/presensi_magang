@@ -27,7 +27,7 @@ async function login(req, res) {
                 userId: user.id,
                 role: role
             }, process.env.JWT_KEY, {
-                expiresIn: '15s' // Set the token expiration time (e.g., 15 minutes)
+                expiresIn: '15m' // Set the token expiration time (e.g., 15 minutes)
             });
 
             const refreshToken = jwt.sign({
@@ -105,47 +105,54 @@ async function logout(req, res) {
     }
 }
 
-const refreshToken = async(req,res) => {
+const refreshToken = async (req, res) => {
     try {
-        const refreshtoken = req.cookies.refreshtoken;
-        if (!refreshtoken){
+        const token = req.headers.authorization.split(" ")[1];
+        const decodedToken = jwt.verify(token, process.env.JWT_KEY);
+        const role = decodedToken.role;
+        const refreshToken = req.cookies.refreshtoken;
+        if (!refreshToken) {
             return res.status(401).json({
-                'msg': "cookies bertingkah aneh"
+                message: "Missing or invalid refresh token"
             });
         }
-        const role = req.userData.role;
+
         if (role === 'peserta_magang' || role === 'admin') {
             const userModel = role === 'peserta_magang' ? models.Peserta_Magang : models.Admin;
-            const user = await userModel.findOne({ where: { refreshTokens: refreshtoken } });
+            const user = await userModel.findOne({ where: { refreshTokens: refreshToken } });
 
-            if (!user){
+            if (!user) {
                 return res.status(403).json({
-                    'mesg': "ini lu bukan ?"
+                    message: "Invalid user"
                 });
             }
-            jwt.verify(refreshtoken, process.env.REFRESH_TOKEN_SECRET, (err,decoded) =>{
-                if(err){
+
+            jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
+                if (err) {
                     return res.status(403).json({
-                        'message': "somethin went wrong "
+                        message: "Invalid refresh token"
                     });
                 }
-                const token = jwt.sign({
+                const newToken = jwt.sign({
                     username: user.username,
                     userId: user.id,
                     role: role
                 }, process.env.JWT_KEY, {
-                    expiresIn: '15m' // Set the token expiration time (e.g., 15 minutes)
+                    expiresIn: '15m'
                 });
-                console.log(token);
+                res.status(200).json({
+                    token: newToken
+                });
             });
         }
-
     } catch (error) {
         return res.status(500).json({
-            "message": "something wen wrong"
-        })
+            message: "Something went wrong"
+        });
     }
 }
+
+
 
 module.exports = {
     login: login,
