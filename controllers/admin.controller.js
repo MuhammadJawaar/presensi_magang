@@ -336,13 +336,16 @@ async function editPeserta(req,res){
                 const updatedPeserta = {
                     nama: req.body.nama,
                     username: req.body.username,
-                    password: hash,
                     asal_univ: req.body.asal_univ,
                     asal_jurusan: req.body.asal_jurusan,
                     tanggal_mulai: req.body.tanggal_mulai,
                     tanggal_selesai: req.body.tanggal_selesai,
                     status_aktif: req.body.status_aktif
                 }
+                if (req.body.password !== null) {
+                    updatedPeserta.password = hash;
+                }
+                
                 const isDateOnly = (value) => {
                     // Add your custom validation logic here to check if the value is a date without a time component
                     // For example, you can use a regular expression to match date-only format (YYYY-MM-DD)
@@ -352,8 +355,8 @@ async function editPeserta(req,res){
                 
                 const schema = {
                     nama: { type: "string", optional: false, max: 50 },
-                    username: { type: "string", optional: false, max: 50 },
-                    password: { type: "string", optional: false},
+                    username: { type: "string", optional: true, max: 50 },
+                    password: { type: "string", optional: true},
                     asal_univ: { type: "string", optional: false, max: 50 },
                     asal_jurusan: { type: "string", optional: false, max: 50 },
                     tanggal_mulai: { type: "custom", messages: { custom: "Invalid date format" }, check: isDateOnly },
@@ -396,39 +399,48 @@ function deletePeserta(req, res){
             message: "Something went wrong",
             error:error
         });
-    });
+    }); 
 }
 
-async function showPresensiPerDay(req, res){
+async function showPresensiPerDay(req, res) {
     const response = await axios.get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
-    const tanggal = req.body.tanggal
-        ? moment.tz(req.body.tanggal, "Asia/Jakarta")
-        : moment.tz(response.data.datetime, "Asia/Jakarta");
-    await models.Peserta_Magang.findAll({
-        include:[{
-            model: models.Presensi,
-            as:'presensimagang',
-            where: {
-                tanggal:tanggal.format('YYYY-MM-DD')
-            }
-        }]
-    }).then(presensi =>{
+    const tanggal = moment.tz(response.data.datetime, 'Asia/Jakarta');
+
+    try {
+        const presensi = await models.Peserta_Magang.findAll({
+            include: [{
+                model: models.Presensi,
+                as: 'presensimagang',
+                where: {
+                    tanggal: tanggal.format('YYYY-MM-DD')
+                }
+            }]
+        });
+
+        // Menghitung jumlah presensi yang memiliki check_in atau check_out tidak null
+        const totalSudahPresensi = presensi.reduce(
+            (total, peserta) =>
+                total + peserta.presensimagang.filter(p => p.check_in !== null || p.check_out !== null).length,
+            0
+        );
+
         res.status(200).json({
-            presensi: presensi
+            presensi: presensi,
+            totalSudahPresensi: totalSudahPresensi
         });
-    }).catch(error =>{
+    } catch (error) {
         res.status(500).json({
-            message: "Something went wrong",
-            error:error
+            message: 'Something went wrong',
+            error: error
         });
-    });
+    }
 }
+
 
 async function showPresensiBelum(req, res) {
   try {
     const response = await axios.get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
     const tanggal = moment.tz(response.data.datetime, "Asia/Jakarta");
-    
     
     const presensi = await models.Peserta_Magang.findAll({
       include: [{
@@ -788,9 +800,7 @@ async function exportPeserta(req, res) {
   async function exportPresensiPeserta(req, res) {
     try {
       const response = await axios.get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
-      const tanggal = req.body.tanggal
-        ? moment.tz(req.body.tanggal, "Asia/Jakarta")
-        : moment.tz(response.data.datetime, "Asia/Jakarta");
+      const tanggal = moment.tz(response.data.datetime, "Asia/Jakarta");
       const results = await models.Peserta_Magang.findAll({
         include:[{
             model: models.Presensi,

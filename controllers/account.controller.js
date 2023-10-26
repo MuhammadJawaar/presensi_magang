@@ -28,33 +28,16 @@ async function login(req, res) {
                 userId: user.id,
                 role: role
             }, process.env.JWT_KEY, {
-                expiresIn: '15m' // Set the token expiration time (e.g., 15 minutes)
+                expiresIn: '15s' // Set the token expiration time (e.g., 15 minutes)
             });
-
-            const refreshToken = jwt.sign({
-                nama: user.nama,
-                username: user.username,
-                userId: user.id,
-                role: role
-            }, process.env.REFRESH_TOKEN_SECRET, {
-                expiresIn: '7d' // Set the refresh token expiration time (e.g., 7 days)
-            });
-
-            // Update the refreshTokens in the database
-            await user.update({refreshTokens: refreshToken},{
-                where:{
-                    id: user.id
-                }
-            })
-            res.cookie('refreshtoken', refreshToken, {
+            res.cookie('token', token, {
                 httpOnly: true,
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+                maxAge: 15 * 60 * 1000 // 15 menit
             });
 
             res.status(200).json({
                 message: "Berhasil autentikasi",
                 token: token,
-                refreshToken: refreshToken
             });            
 
         } else {
@@ -62,6 +45,7 @@ async function login(req, res) {
                 message: 'Role not supported',
             });
         }
+
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({
@@ -72,33 +56,36 @@ async function login(req, res) {
 async function logout(req, res) {
     try {
         // Periksa token akses dalam header
-        const token = req.headers.authorization.split(" ")[1];
-        const decodedToken = jwt.verify(token, process.env.JWT_KEY);
-        const role = decodedToken.role;
-        const refreshToken = req.cookies.refreshtoken;
-
+        const refreshToken = req.cookies.token;
+        
         if (!refreshToken) {
             return res.status(204).json({ message: "Token penyegar tidak ditemukan." });
         }
-
-        if (role === 'peserta_magang' || role === 'admin') {
-            const userModel = role === 'peserta_magang' ? models.Peserta_Magang : models.Admin;
-            const user = await userModel.findOne({ where: { refreshTokens: refreshToken } });
-
-            if (!user) {
-                return res.status(204).json({ message: "Anda sudah logout sebelumnya." });
+        jwt.verify(refreshToken, process.env.JWT_KEY, async (err,decodedToken) =>{
+            if (err){
+                res.clearCookie('token');
+                return res.status(403).json({
+                    message: "token invalid"
+                });
             }
+            const role = decodedToken.role;
+            const username = decodedToken.username;
 
-            // Lakukan perbaruan di database untuk menghapus refresh token
-            await userModel.update({ refreshTokens: null }, { where: { id: user.id } });
-
-            // Hapus cookie refresh token
-            res.clearCookie('refreshtoken');
-
-            return res.status(200).json({ message: "Logout berhasil." });
-        } else {
-            return res.status(400).json({ message: "Peran tidak didukung." });
-        }
+            if (role === 'peserta_magang' || role === 'admin') {
+                const userModel = role === 'peserta_magang' ? models.Peserta_Magang : models.Admin;
+                const user = await userModel.findOne({ where: { username: username } });
+    
+                if (!user) {
+                    return res.status(204).json({ message: "Anda sudah logout sebelumnya." });
+                }
+    
+                res.clearCookie('token');
+    
+                return res.status(200).json({ message: "Logout berhasil." });
+            } else {
+                return res.status(400).json({ message: "Peran tidak didukung." });
+            }
+        });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: "Terjadi kesalahan saat logout.", error: error });
@@ -107,7 +94,7 @@ async function logout(req, res) {
 
 const refreshToken = async (req, res) => {
     try {
-        const refreshTokenCookie = req.cookies.refreshtoken; // Ganti nama variabel agar tidak konflik
+        const refreshTokenCookie = req.cookies.token; // Ganti nama variabel agar tidak konflik
         if (!refreshTokenCookie) {
             return res.status(401).json({
                 message: "Missing or invalid refresh token"
@@ -115,14 +102,14 @@ const refreshToken = async (req, res) => {
         }
 
         // Periksa token dengan jwt.verify
-        jwt.verify(refreshTokenCookie, process.env.REFRESH_TOKEN_SECRET, async (err, decoded) => {
+        jwt.verify(refreshTokenCookie, process.env.JWT_KEY, async (err, decoded) => {
             if (err) {
                 return res.status(403).json({
                     message: "Invalid refresh token"
                 });
             }
 
-            const user = await models.Peserta_Magang.findOne({ where: { refreshTokens: refreshTokenCookie } }) || await models.Admin.findOne({ where: { refreshTokens: refreshTokenCookie } });
+            const user = await models.Peserta_Magang.findOne({ where: { username: decoded.username } }) || await models.Admin.findOne({ where: { username: decoded.username } });
             if (!user) {
                 return res.status(403).json({
                     message: "Invalid user"
@@ -136,7 +123,7 @@ const refreshToken = async (req, res) => {
                 userId: user.id,
                 role: decoded.role // Pastikan Anda mendapatkan "role" dengan benar
             }, process.env.JWT_KEY, {
-                expiresIn: '15m'
+                expiresIn: '15s'
             });
 
             res.status(200).json({
