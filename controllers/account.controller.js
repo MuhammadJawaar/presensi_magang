@@ -28,7 +28,7 @@ async function login(req, res) {
                 userId: user.id,
                 role: role
             }, process.env.JWT_KEY, {
-                expiresIn: '15s' // Set the token expiration time (e.g., 15 minutes)
+                expiresIn: '15m' // Set the token expiration time (e.g., 15 minutes)
             });
             res.cookie('token', token, {
                 httpOnly: true,
