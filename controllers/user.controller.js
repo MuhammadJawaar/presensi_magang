@@ -36,7 +36,7 @@ function showPresensi(req, res){
     if (true){
         models.Presensi.findAll({where:{p_id:id}}).then(result =>{
             res.status(200).json({
-                tugas:result
+                presensi:result
             });
     }).catch(error =>{
         res.status(500).json({
