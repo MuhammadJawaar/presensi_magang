@@ -123,7 +123,7 @@ const refreshToken = async (req, res) => {
                 userId: user.id,
                 role: decoded.role // Pastikan Anda mendapatkan "role" dengan benar
             }, process.env.JWT_KEY, {
-                expiresIn: '15s'
+                expiresIn: '15m'
             });
 
             res.status(200).json({
