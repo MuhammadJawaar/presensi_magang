@@ -5,6 +5,7 @@ const imageUploader = require('../helpers/image-uploader')
 
 const router = express.Router();
 
+router.get("/show-admin-id/:id", checkAuthMiddleware.checkAuth('admin'), adminController.showAdminById);
 router.get("/show-admin", checkAuthMiddleware.checkAuth('admin'), adminController.showAdmin);
 router.post("/add-admin", checkAuthMiddleware.checkAuth('admin'), adminController.addAdmin);
 router.patch("/edit-admin/:id", checkAuthMiddleware.checkAuth('admin'), adminController.editAdmin);

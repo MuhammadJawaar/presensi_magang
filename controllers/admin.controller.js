@@ -22,6 +22,21 @@ function showAdmin(req,res){
     });
 }
 
+function showAdminById(req, res){
+    const id = req.params.id;
+
+    models.Admin.findByPk(id).then(result =>{
+        res.status(200).json({
+            admin:result
+        });
+    }).catch(error =>{
+        res.status(500).json({
+            message: "Something went wrong",
+            error:error
+        });
+    });
+}
+
 function addAdmin(req, res,){
     models.Admin.findOne({where:{username: req.body.username}}).then(result =>{
         if (result){
@@ -898,5 +913,6 @@ module.exports = {
     exportPeserta: exportPeserta,
     exportStatusTugas: exportStatusTugas,
     exportPresensiPeserta: exportPresensiPeserta,
-    showAdmin:showAdmin
+    showAdmin:showAdmin,
+    showAdminById:showAdminById
 }
