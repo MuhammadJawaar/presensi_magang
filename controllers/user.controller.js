@@ -3,8 +3,14 @@ const moment = require('moment');
 const axios = require('axios');
 
 
-function showTugasList(){
-    models.Status_tugas.findAll().then(result =>{
+function showTugasList(req,res){
+    const id = req.params.id;
+    models.Status_tugas.findAll({
+      where:{p_id:id},
+      include: [{
+        model: models.Tugas
+    }]
+    }).then(result =>{
         res.status(200).json({
             tugas:result
         });
@@ -158,7 +164,7 @@ async function doPresensi(req, res, url) {
   }
 
 function doTugas(req, res, url){
-    const pid = req.body.pid; //ini perlu diganti biar otomatis
+    const id = req.params.id; //ini perlu diganti biar otomatis
     const tid = req.params.tid;
 
     const baseUrl = 'http://localhost:3000/'
@@ -168,7 +174,7 @@ function doTugas(req, res, url){
         tugas_url: baseUrl + fileName,
         status_pengerjaan: true
     }
-    models.Status_tugas.update(tugas, {where:{p_id:pid, t_id: tid}}).then(result => {
+    models.Status_tugas.update(tugas, {where:{p_id:id, t_id: tid}}).then(result => {
         res.status(201).json({
             message: "Tugas Uploaded successfully"
         });
