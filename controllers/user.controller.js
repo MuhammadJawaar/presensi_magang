@@ -8,7 +8,9 @@ function showTugasList(req,res){
     models.Status_tugas.findAll({
       where:{p_id:id},
       include: [{
-        model: models.Tugas
+        model: models.Tugas,
+        as: 'tugas'
+        
     }]
     }).then(result =>{
         res.status(200).json({

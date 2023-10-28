@@ -12,9 +12,11 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Status_tugas.belongsTo(models.Peserta_Magang, {
         foreignKey: 'p_id', // Name of the foreign key in Presensi table
+        
       });
       Status_tugas.belongsTo(models.Tugas, {
         foreignKey: 't_id', // Name of the foreign key in Presensi table
+        as: 'tugas'
       });
 
     }
