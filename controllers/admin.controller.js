@@ -125,9 +125,9 @@ function editAdmin(req, res){
                             }
                         
                             const schema = {
-                                nama: {type:"string", optional:false, max:50},
-                                username: {type:"string", optional:false, max:50},
-                                password: {type:"string", optional:false}
+                                nama: {type:"string", optional:true, max:50},
+                                username: {type:"string", optional:true, max:50},
+                                password: {type:"string", optional:true}
                             }
                         
                             const v = new Validator();
@@ -382,11 +382,11 @@ async function editPeserta(req,res){
                 };
                 
                 const schema = {
-                    nama: { type: "string", optional: false, max: 50 },
+                    nama: { type: "string", optional: true, max: 50 },
                     username: { type: "string", optional: true, max: 50 },
                     password: { type: "string", optional: true},
-                    asal_univ: { type: "string", optional: false, max: 50 },
-                    asal_jurusan: { type: "string", optional: false, max: 50 },
+                    asal_univ: { type: "string", optional: true, max: 50 },
+                    asal_jurusan: { type: "string", optional: true, max: 50 },
                     tanggal_mulai: { type: "custom", messages: { custom: "Invalid date format" }, check: isDateOnly },
                     tanggal_selesai: { type: "custom", messages: { custom: "Invalid date format" }, check: isDateOnly },
                     status_aktif: { type: "boolean" } // Validate as a boolean
