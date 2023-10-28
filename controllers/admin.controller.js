@@ -9,6 +9,19 @@ const exceljs = require('exceljs');
 const fs = require('fs');
 const axios = require('axios');
 
+function showAdmin(req,res){
+    models.Admin.findAll().then(result =>{
+        res.status(200).json({
+            admin:result
+        });
+    }).catch(error =>{
+        res.status(500).json({
+            message: "Something went wrong",
+            error:error
+        });
+    });
+}
+
 function addAdmin(req, res,){
     models.Admin.findOne({where:{username: req.body.username}}).then(result =>{
         if (result){
@@ -886,5 +899,6 @@ module.exports = {
     exportAdmin: exportAdmin,
     exportPeserta: exportPeserta,
     exportStatusTugas: exportStatusTugas,
-    exportPresensiPeserta: exportPresensiPeserta
+    exportPresensiPeserta: exportPresensiPeserta,
+    showAdmin:showAdmin
 }
