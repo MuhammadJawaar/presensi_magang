@@ -5,7 +5,7 @@ const imageUploader = require('../helpers/image-uploader');
 
 const router = express.Router();
 
-router.get("/tugas/list", checkAuthMiddleware.checkAuth('peserta_magang'), userController.showTugasList);
+router.get("/tugas-list", checkAuthMiddleware.checkAuth('peserta_magang'), userController.showTugasList);
 router.get("/tugas/:id", checkAuthMiddleware.checkAuth('peserta_magang'), userController.showTugas); //cek token
 router.patch("/tugas/:tid/submit", checkAuthMiddleware.checkAuth('peserta_magang'), imageUploader.upload.single('image'), (req, res) =>{
     if (!req.file) {

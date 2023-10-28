@@ -556,11 +556,9 @@ function showTugasStatusByTugas(req, res){
 async function addTugas(req, res, url) {
     try {
         statusCheck(req, res);
-        const baseUrl = 'http://localhost:3000/'
-        const fileName = url.replace('\\' , '/');
         const tugas = {
             judul: req.body.judul,
-            tugas_url: baseUrl + fileName,
+            tugas_url: req.body.tugas_url,
             dueDate: req.body.dueDate
         }
         const schema = {
