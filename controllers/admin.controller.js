@@ -550,6 +550,7 @@ function showTugasStatusByTugas(req, res){
         },
         include:[{
             model:models.Status_tugas,
+            as:"status_tugas",
             where:{
                 t_id:tid
             }
@@ -636,9 +637,16 @@ async function addStatusToAll(result_tugas, req, res) {
 function deleteTugas(req, res){
     const id = req.params.id;
 
-    models.Tugas.destroy({where:{id:id}}).then(result =>{
-        res.status(200).json({
-            message: "Peserta Magang deleted"
+    models.Status_tugas.destroy({where:{t_id:id}}).then(result =>{
+        models.Tugas.destroy({where:{id:id}}).then(result =>{
+            res.status(200).json({
+                message: "Tugas deleted"
+            });
+        }).catch(error =>{
+            res.status(500).json({
+                message: "Something went wrong",
+                error:error
+            });
         });
     }).catch(error =>{
         res.status(500).json({

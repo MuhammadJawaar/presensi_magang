@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'p_id', // Name of the foreign key in Presensi table
         as: 'presensimagang', // Alias for the association
       });
+      Peserta_Magang.hasMany(models.Status_tugas, {
+        foreignKey: 'p_id', // Name of the foreign key in Presensi table
+        as: 'status_tugas', // Alias for the association
+      });
     }
   }
   Peserta_Magang.init({
