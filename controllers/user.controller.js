@@ -63,9 +63,9 @@ function showPresensi(req, res){
 async function doPresensi(req, res, url) {
     try {
       const response = await axios.get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
-      const time = moment(new Date("2023-09-01T07:59:00.0000"));
+      const time = moment.tz(response.data.datetime, 'Asia/Jakarta');
       const pid = req.params.id;
-      const baseUrl = 'http://localhost:3000/';
+      const baseUrl = process.env.APIDISKOMINFO;
       const fileName = url.replace('\\', '/');
       const hari = time.day();
       const currentDate = moment(time); // Menggunakan waktu dari WorldTimeAPI
@@ -170,7 +170,7 @@ function doTugas(req, res, url){
     const id = req.params.id; //ini perlu diganti biar otomatis
     const tid = req.params.tid;
 
-    const baseUrl = 'http://localhost:3000/'
+    const baseUrl = process.env.APIDISKOMINFO;
     const fileName = url.replace('\\' , '/');
 
     const tugas = {
