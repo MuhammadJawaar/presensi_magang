@@ -1,7 +1,8 @@
 const models = require('../models');
 const moment = require('moment');
 const axios = require('axios');
-
+const bcryptjs = require('bcryptjs');
+const Validator = require('fastest-validator');
 
 function showTugasList(req,res){
     const id = req.params.id;
@@ -62,7 +63,7 @@ function showPresensi(req, res){
 async function doPresensi(req, res, url) {
     try {
       const response = await axios.get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
-      const time = moment.tz(response.data.datetime, 'Asia/Jakarta');
+      const time = moment(new Date("2023-09-01T07:59:00.0000"));
       const pid = req.params.id;
       const baseUrl = 'http://localhost:3000/';
       const fileName = url.replace('\\', '/');
@@ -188,7 +189,7 @@ function doTugas(req, res, url){
     });
 }
 
-function editPassword(){
+function editPassword(req, res){
     bcryptjs.genSalt(10,async function(err,salt){
         bcryptjs.hash(req.body.password,salt,async function(err,hash){
             try {
@@ -201,7 +202,7 @@ function editPassword(){
                 }
 
                 const v = new Validator();
-                const validationResponse = v.validate(udpatePeserta, schema);
+                const validationResponse = v.validate(updatedPeserta, schema);
 
                 if(validationResponse !== true){
                     return res.status(400).json({

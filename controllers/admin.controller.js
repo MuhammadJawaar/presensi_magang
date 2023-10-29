@@ -104,6 +104,14 @@ function addAdmin(req, res,){
 }
 
 function editAdmin(req, res){
+    const username = req.body.username;
+    const id = req.params.id;
+    const admin = {
+        nama: req.body.nama,
+    }
+    if (username) {
+        admin.username = username;
+    }
     models.Admin.findOne({where:{username: req.body.username}}).then(result =>{
         if (result){
             res.status(409).json({
@@ -118,11 +126,8 @@ function editAdmin(req, res){
                 }else{
                     bcryptjs.genSalt(10,async function(err,salt){
                         bcryptjs.hash(req.body.password,salt,async function(err,hash){
-                            const admin = {
-                                nama: req.body.nama,
-                                username: req.body.username,
-                                password: hash
-                            }
+                            admin.password = hash;
+                            
                         
                             const schema = {
                                 nama: {type:"string", optional:true, max:50},
@@ -140,7 +145,7 @@ function editAdmin(req, res){
                                 });
                             }
                         
-                            models.Admin.update(admin, {where:{id:req.params.id}}).then(result => {
+                            models.Admin.update(admin, {where:{id:id}}).then(result => {
                                 res.status(201).json({
                                     message: "admin updated successfully"
                                 });
