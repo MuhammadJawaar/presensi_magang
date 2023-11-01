@@ -11,22 +11,25 @@ router.post("/add-admin", checkAuthMiddleware.checkAuth('admin'), adminControlle
 router.patch("/edit-admin/:id", checkAuthMiddleware.checkAuth('admin'), adminController.editAdmin);
 router.get("/export-admin", checkAuthMiddleware.checkAuth('admin'), adminController.exportAdmin);
 
-router.get("/peserta",  adminController.showPesertaAll);
-router.get("/peserta-aktif",  adminController.showPesertaAktifAll);
-router.get("/peserta-alumni", adminController.showPesertaAlumniAll);
-router.get("/peserta-calon", adminController.showCalonPesertaAll);
+router.get("/peserta",  checkAuthMiddleware.checkAuth('admin'), adminController.showPesertaAll);
+router.get("/peserta-aktif",  checkAuthMiddleware.checkAuth('admin'), adminController.showPesertaAktifAll);
+router.get("/peserta-alumni", checkAuthMiddleware.checkAuth('admin'), adminController.showPesertaAlumniAll);
+router.get("/peserta-calon", checkAuthMiddleware.checkAuth('admin'), adminController.showCalonPesertaAll);
 router.get("/peserta/:id",  checkAuthMiddleware.checkAuth('admin'),adminController.showPeserta); 
 router.post("/peserta/add", checkAuthMiddleware.checkAuth('admin'), adminController.addPeserta);
 router.patch("/peserta/:id/edit", checkAuthMiddleware.checkAuth('admin'), adminController.editPeserta);
 router.delete("/peserta/:id/delete", checkAuthMiddleware.checkAuth('admin'), adminController.deletePeserta);
-router.get("/export-peserta",checkAuthMiddleware.checkAuth('admin'), adminController.exportPeserta);
+router.get("/export-peserta",  checkAuthMiddleware.checkAuth('admin'), adminController.exportPeserta);
+router.get("/export-peserta-aktif",  checkAuthMiddleware.checkAuth('admin'), adminController.exportPesertaAktif);
+router.get("/export-peserta-alumni", checkAuthMiddleware.checkAuth('admin'), adminController.exportPesertaAlumni);
+router.get("/export-peserta-calon", checkAuthMiddleware.checkAuth('admin'), adminController.exportCalonPeserta);
 router.get("/peserta/:id/presensi",checkAuthMiddleware.checkAuth('admin'), adminController.showPresensiPeserta);
-router.get("/export-presensi-peserta/:id", adminController.exportPresensiPerPeserta);
+router.get("/export-presensi-peserta/:id", checkAuthMiddleware.checkAuth('admin'), adminController.exportPresensiPerPeserta);
 
 router.get("/presensi", checkAuthMiddleware.checkAuth('admin'), adminController.showPresensiPerDay);
 router.get("/presensi/negatif", checkAuthMiddleware.checkAuth('admin'), adminController.showPresensiBelum);
 router.get("/presensi/:id", checkAuthMiddleware.checkAuth('admin'), adminController.showPresensiPerPeserta);
-router.get("/export-presensi",checkAuthMiddleware.checkAuth('admin'),  adminController.exportPresensiPerTanggal);
+router.get("/export-presensi", checkAuthMiddleware.checkAuth('admin'), adminController.exportPresensiPerTanggal);
 
 
 router.get("/tugas", checkAuthMiddleware.checkAuth('admin'), adminController.showTugasAll);
