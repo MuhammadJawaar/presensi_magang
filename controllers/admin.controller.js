@@ -253,6 +253,21 @@ async function addPeserta(req, res){
     });
 }
 
+function showPresensiPeserta(req, res){
+    const id = req.params.id;
+    models.Presensi.findAll({where:{p_id:id}}).then(result =>{
+        res.status(200).json({
+            presensi:result
+        });
+    }).catch(error =>{
+        res.status(500).json({
+            message: "Something went wrong",
+            error:error
+        });
+    });
+
+}
+
 async function addPresensiForPeserta(result_peserta, req, res){
     try {
         //result_peserta.tanggal_mulai
@@ -315,6 +330,57 @@ async function showPesertaAll(req, res){
         });
     });
 }
+
+async function showPesertaAktifAll(req, res){
+    statusCheck(req, res);
+    await models.Peserta_Magang.findAll({where:{status_aktif:true}}).then(result =>{
+        res.status(200).json({
+            peserta_magang:result
+        });
+    }).catch(error =>{
+        res.status(500).json({
+            message: "Something went wrong",
+            error:error
+        });
+    });
+}
+
+async function showPesertaAlumniAll(req, res){
+    statusCheck(req, res);
+    await models.Peserta_Magang.findAll({where:{status_aktif:false}}).then(result =>{
+        res.status(200).json({
+            peserta_magang:result
+        });
+    }).catch(error =>{
+        res.status(500).json({
+            message: "Something went wrong",
+            error:error
+        });
+    });
+}
+
+async function showCalonPesertaAll(req, res) {
+    statusCheck(req, res);
+    const response = await axios.get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
+    const currentDate = moment.tz(response.data.datetime, 'Asia/Jakarta'); // Get the current date and time
+    await models.Peserta_Magang.findAll({
+        where: {
+            tanggal_mulai: {
+                [Op.gt]: currentDate, // [Op.lt] stands for less than
+            }
+        }
+    }).then(result => {
+        res.status(200).json({
+            peserta_magang: result
+        });
+    }).catch(error => {
+        res.status(500).json({
+            message: "Something went wrong",
+            error: error
+        });
+    });
+}
+
 
 async function editPresensiForPeserta(result_peserta,id, req, res) {
     try {
@@ -836,7 +902,7 @@ async function exportPeserta(req, res) {
     }
   }
 
-  async function exportPresensiPeserta(req, res) {
+  async function exportPresensiPerTanggal(req, res) {
     try {
       const response = await axios.get('http://worldtimeapi.org/api/timezone/Asia/Jakarta');
       const tanggal = req.query.tanggal ? moment.tz(req.query.tanggal, 'Asia/Jakarta') : moment.tz(response.data.datetime, 'Asia/Jakarta');
@@ -906,6 +972,80 @@ async function exportPeserta(req, res) {
     }
   }
 
+  async function exportPresensiPerPeserta(req, res) {
+  try {
+    const id = req.params.id;
+    const results = await models.Presensi.findAll({ where: { p_id: id } });
+    const ambilNama = await models.Peserta_Magang.findByPk(id);
+    const fileName = "Presensi " + ambilNama.nama + ".xlsx";
+
+    const workbook = new exceljs.Workbook();
+    const sheet = workbook.addWorksheet(ambilNama.nama);
+
+    
+
+    sheet.columns = [
+      { header: 'Tanggal', key: 'tanggal', width: 15 },
+      { header: 'Check-In', key: 'check_in', width: 15 },
+      { header: 'Check-Out', key: 'check_out', width: 15 },
+      { header: 'Nama Peserta Magang: '+ ambilNama.nama, width: 45 },
+    ];
+
+    
+
+    results.forEach((value) => {
+      const checkInValue = value.check_in ? 'Sudah Presensi' : 'Belum Presensi';
+      const checkOutValue = value.check_out ? 'Sudah Presensi' : 'Belum Presensi';
+
+      // Function to set cell background color
+      function setCellBackgroundColor(value) {
+        return value === 'Sudah Presensi' ? 'FF00FF00' : 'FFFF0000';
+      }
+
+      
+      sheet.addRow({
+        tanggal: value.tanggal,
+        check_in: checkInValue,
+        check_out: checkOutValue
+      });
+
+      // Set cell background color after adding the row
+      sheet.getCell(sheet.rowCount, sheet.getColumn('check_in').number).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: setCellBackgroundColor(checkInValue) }
+      };
+      sheet.getCell(sheet.rowCount, sheet.getColumn('check_out').number).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: setCellBackgroundColor(checkOutValue) }
+      };
+    });
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+
+    res.setHeader(
+      'Content-Disposition',
+      `attachment;filename=${fileName}`
+    );
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    res.end(buffer);
+  } catch (error) {
+    console.error('An error occurred:', error);
+    res.status(500).json({
+      message: 'Something went wrong',
+      error: error,
+    });
+  }
+}
+
+  
+  
+
 module.exports = {
     addAdmin:addAdmin,
     addPeserta:addPeserta,
@@ -925,7 +1065,12 @@ module.exports = {
     exportAdmin: exportAdmin,
     exportPeserta: exportPeserta,
     exportStatusTugas: exportStatusTugas,
-    exportPresensiPeserta: exportPresensiPeserta,
+    exportPresensiPerTanggal: exportPresensiPerTanggal,
     showAdmin:showAdmin,
-    showAdminById:showAdminById
+    showAdminById:showAdminById,
+    showPresensiPeserta: showPresensiPeserta,
+    exportPresensiPerPeserta: exportPresensiPerPeserta,
+    showPesertaAktifAll:showPesertaAktifAll,
+    showPesertaAlumniAll:showPesertaAlumniAll,
+    showCalonPesertaAll:showCalonPesertaAll
 }
